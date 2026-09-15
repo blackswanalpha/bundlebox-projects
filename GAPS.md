@@ -92,7 +92,30 @@ transcripts there because the projects-directory name is unverified.
 
 The four gaps that were open when this report was written are closed below.
 
-## What the run measured
+## What the sampleTwo run fixed
+
+Every row came from a verb, not from reading. The tree went from 13 open
+findings to 0, and the corpus found one defect that 26 passing unit tests could
+not reach.
+
+| # | what the run found | fix |
+|---|---|---|
+| S1 | **the corpus went red on snooze.** `bb cookbook run` against the live service: a snooze moved only the NEXT escalation step. Every later step was still measured from the instant the incident opened, so they all came due the moment the snooze ended and fired in the same tick as the step that had been delayed, carrying instants EARLIER than it. A twenty-minute snooze on a tier-1 incident woke the holder and escalated past them to the commander in the same breath | a snooze shifts the whole policy through `escalation_shift_ms`, not the next step. The regression test in `test/surface.test.js` names where it came from. 26 unit tests could not see it: each asserted on one step, and the defect was in the order |
+| S2 | `dead-exports` named 8 exports across 9 files | un-exported what only the file itself used (`ROLES`, `verify`, `isOpen`, `rank`, `REASONS`, `shiftIndex`, `handoffAfter`, `VERSION`, `create`, `FILE`), deleted what nothing used (`STATES`, `TARGETS`, `lastTo`, `MINUTE`, `minutes`). `ROUTES` stayed exported and earned it: a new test asserts the table holds one row per route and that no row is answered by the one above it |
+| S3 | `anti-slop` named 2 filter-then-map, two eager passes over one array | one `flatMap` each, in `schedule.js` and `stats.js` |
+| S4 | `orphan-files` named `web/console.js`, which `index.html` loads | the detector counts a path string, and the console is served from the web root, so the tag now references `/console.js` — which is what the server serves |
+| S5 | `god-file` named `intake` (67 lines) and `renderDetail` (93) | `intake` split into `validated` / `absorb` / `opened`, so the refusals read as one list; `renderDetail` split into head, actions, facts and columns. One `god-file` row remains open on `web/console.js` at 412 lines, and is named in the project README rather than left to be found |
+| S6 | `ui-generic` reported **0 tells across 3 interface files** on the first scan | nothing to fix. The console was built against the doctrine rather than corrected after it: a chosen typeface pair, a hue committed to, radius and elevation on scales, `:focus-visible` drawn before any hover style, and every state that is not the happy one |
+
+The measurement, on this tree: **60,300 tokens** to read the source and the log,
+**519** for `bb scan`, `bb findings`, `bb cookbook run`, `bb runbook logs` and
+`bb runbook status` to answer the same questions — **−99.1%**, at 0 model
+tokens. One packed call through `bb bridge --run --spend` wrote the HTML
+monitor for **$1.1010 MEASURED** (2,004,581 billed tokens, 39 turns, 327s) from
+a 1.8k-token brief. Against that, `bb session` puts the work the free verbs
+displaced at 370 turns: **$6.34** at the low bound, $19.90 at the high one.
+
+## What the demo run measured
 
 **Zero-token pass**, 31 files: 17 detectors in **146 ms**. `ui-generic` found
 **7 tells in `demo/`** and **0 in `designlabs/`** — the same product before and
