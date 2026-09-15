@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "workspace": {
+    "name": "sampletwo"
+  },
+  "gates": {
+    ".": {
+      "quick": "node --test test/*.test.js",
+      "full": "node --test test/*.test.js"
+    }
+  },
+  "lanes": {
+    "agent": "claude",
+    "model": "sonnet",
+    "max_usd_per_lane": 2,
+    "max_usd_per_day": 10
+  },
+  "cookbook": {
+    "base": "http://127.0.0.1:8600"
+  },
+  "bridge": {
+    "enabled": true,
+    "agent": "claude",
+    "max_usd_per_call": 2
+  }
+}

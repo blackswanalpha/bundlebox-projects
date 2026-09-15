@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay — monitor</title>
+<meta name="description" content="A wallboard built from what bundlebox already recorded: the last scan, the last corpus run, the runbook, and the live stats.">
+<link rel="stylesheet" href="../web/console.css">
+<style>
+  .monitor { display: grid; gap: var(--s4); max-width: 1100px; margin: 0 auto; padding: var(--s4); }
+  .panel { background: var(--raised); border: 1px solid var(--rule); border-radius: var(--r-panel); padding: var(--s3) var(--s4); box-shadow: var(--z-raised); }
+  .panel h2 { font-family: var(--font-text); font-size: var(--f-micro); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0 0 var(--s2); }
+</style>
+</head>
+<body>
+<header class="masthead">
+  <a class="wordmark" href="/">Relay<span class="wordmark-dot"></span></a>
+  <p class="standfirst">Monitor — built from bundlebox artefacts, generated 2026-09-15T15:36:05.403Z.</p>
+</header>
+<main class="monitor">
+  <section class="panel"><h2>Scan</h2><dl class="figures"><div><dt>open</dt><dd>1</dd></div><div><dt>new</dt><dd>0</dd></div><div><dt>resolved</dt><dd>0</dd></div><div><dt>promotable</dt><dd>1</dd></div><div><dt>checks</dt><dd>18</dd></div><div><dt>scan time</dt><dd>77ms</dd></div></dl><ul class="rota"><li>
+      <span class="name">doc-links</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">6ms</span>
+    </li><li>
+      <span class="name">todo-census</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">1ms</span>
+    </li><li>
+      <span class="name">secret-scan</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">5ms</span>
+    </li><li>
+      <span class="name">big-file</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">5ms</span>
+    </li><li>
+      <span class="name">merge-markers</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">1ms</span>
+    </li><li>
+      <span class="name">worktree-hygiene</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">0ms</span>
+    </li><li>
+      <span class="name">dead-exports</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">6ms</span>
+    </li><li>
+      <span class="name">duplicate-blocks</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">14ms</span>
+    </li><li>
+      <span class="name">god-file</span>
+      <span class="holder">1 finding</span>
+      <span class="handoff">16ms</span>
+    </li><li>
+      <span class="name">orphan-files</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">2ms</span>
+    </li><li>
+      <span class="name">dead-deps</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">1ms</span>
+    </li><li>
+      <span class="name">doc-drift</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">1ms</span>
+    </li><li>
+      <span class="name">lockfile-drift</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">0ms</span>
+    </li><li>
+      <span class="name">stale-evidence</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">0ms</span>
+    </li><li>
+      <span class="name">missing-tests</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">1ms</span>
+    </li><li>
+      <span class="name">debug-leftovers</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">1ms</span>
+    </li><li>
+      <span class="name">ui-generic</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">6ms</span>
+    </li><li>
+      <span class="name">anti-slop</span>
+      <span class="holder">0 findings</span>
+      <span class="handoff">5ms</span>
+    </li></ul>
+    <p class="queue-foot">as of 2026-09-15T15:35:27.260Z</p></section>
+  <section class="panel"><h2>Corpus</h2><dl class="figures"><div><dt>passed</dt><dd>80</dd></div><div><dt>failed</dt><dd>0</dd></div><div><dt>error</dt><dd>0</dd></div><div><dt>blocked</dt><dd>0</dd></div><div><dt>requests</dt><dd>83</dd></div><div><dt>run time</dt><dd>9.5s</dd></div></dl>
+    <ol class="rows"><li class="row">
+      <span class="spine"></span>
+      <span class="row-summary">the service names itself and the clock it is running on</span>
+      <span class="row-age">0.2s</span>
+      <span class="row-meta">
+        <span class="key">health</span>
+        <span class="badge">high</span>
+        <span class="state state-resolved">passed</span>
+      </span>
+    </li><li class="row">
+      <span class="spine"></span>
+      <span class="row-summary">who holds the pager is computed, at any instant, including before the rotation began</span>
+      <span class="row-age">0.5s</span>
+      <span class="row-meta">
+        <span class="key">oncall</span>
+        <span class="badge">high</span>
+        <span class="state state-resolved">passed</span>
+      </span>
+    </li><li class="row">
+      <span class="spine"></span>
+      <span class="row-summary">a monitor firing over and over is one incident and one page</span>
+      <span class="row-age">1s</span>
+      <span class="row-meta">
+        <span class="key">intake</span>
+        <span class="badge">high</span>
+        <span class="state state-resolved">passed</span>
+      </span>
+    </li><li class="row">
+      <span class="spine"></span>
+      <span class="row-summary">the same symptom after a fix is new information</span>
+      <span class="row-age">0.5s</span>
+      <span class="row-meta">
+        <span class="key">intake</span>
+        <span class="badge">high</span>
+        <span class="state state-resolved">passed</span>
+      </span>
+    </li><li class="row">
+      <span class="spine"></span>
+      <span class="row-summary">a responder answers what is theirs and what they are on call for, and nothing else</span>
+      <span class="row-age">0.7s</span>
+      <span class="row-meta">
+        <span class="key">answer</span>
+        <span class="badge">high</span>
+        <span class="state state-resolved">passed</span>
+      </span>
+    </li><li class="row">
+      <span class="spine"></span>
+      <span class="row-summary">five minutes unanswered reaches the next name, and every step a jump passed fires in order</span>
+      <span class="row-age">1s</span>
+      <span class="row-meta">
+        <span class="key">escalation</span>
+        <span class="badge">high</span>
+        <span class="state state-resolved">passed</span>
+      </span>
+    </li><li class="row">
+      <span class="spine"></span>
+      <span class="row-summary">acknowledgement is the only thing that stops the clock</span>
+      <span class="row-age">0.6s</span>
+      <span class="row-meta">
+        <span class="key">escalation</span>
+        <span class="badge">high</span>
+        <span class="state state-resolved">passed</span>
+      </span>
+    </li><li class="row">
+      <span class="spine"></span>
+      <span class="row-summary">a snoozed page comes back</span>
+      <span class="row-age">1.1s</span>
+      <span class="row-meta">
+        <span class="key">snooze</span>
+        <span class="badge">high</span>
+        <span class="state state-resolved">passed</span>
+      </span>
+    </li><li class="row">
+      <span class="spine"></span>
+      <span class="row-summary">re-grading and handing over are a commander&#39;s, and a board where nothing is downgraded is a board nobody trusts</span>
+      <span class="row-age">1s</span>
+      <span class="row-meta">
+        <span class="key">command</span>
+        <span class="badge">high</span>
+        <span class="state state-resolved">passed</span>
+      </span>
+    </li><li class="row">
+      <span class="spine"></span>
+      <span class="row-summary">acknowledgement and resolution are measured from when the incident opened</span>
+      <span class="row-age">0.9s</span>
+      <span class="row-meta">
+        <span class="key">review</span>
+        <span class="badge">medium</span>
+        <span class="state state-resolved">passed</span>
+      </span>
+    </li><li class="row">
+      <span class="spine"></span>
+      <span class="row-summary">an action the viewer may not take is drawn disabled, with the incident named on it</span>
+      <span class="row-age">1.47s</span>
+      <span class="row-meta">
+        <span class="key">console</span>
+        <span class="badge">high</span>
+        <span class="state state-resolved">passed</span>
+      </span>
+    </li></ol>
+    <p class="queue-foot">sampletwo against http://127.0.0.1:8600 · 2026-09-15T15:27:59.611Z</p></section>
+  <section class="panel"><h2>Runbook</h2><ul class="rota"><li>
+      <span class="name">sampletwo</span>
+      <span class="holder">api · :8600</span>
+      <span class="handoff">node src/server.js</span>
+    </li></ul></section>
+  <section class="panel"><h2>Live stats</h2><dl class="figures"><div><dt>open</dt><dd>3</dd></div><div><dt>unanswered</dt><dd>2 · 41m 00s</dd></div><div><dt>mtta</dt><dd>1m 30s</dd></div><div><dt>mttr</dt><dd>41m 00s</dd></div><div><dt>pages</dt><dd>5</dd></div></dl></section>
+</main>
+</body>
+</html>

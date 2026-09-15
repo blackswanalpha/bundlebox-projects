@@ -1,0 +1,27 @@
+{
+  "id": "health-says-which-clock",
+  "surface": "health",
+  "severity": "high",
+  "title": "the service names itself and the clock it is running on",
+  "question": "is it up, and is time here a value or the wall?",
+  "rule": [
+    "Every deadline is an instant and the clock is a number beside them — src/clock.js",
+    "PRD rule 1."
+  ],
+  "steps": [
+    {
+      "name": "it answers, and says it is Relay rather than whatever else is on the port",
+      "do": "GET /health",
+      "expect": {
+        "status": 200,
+        "json": { "ok": true, "service": "sampletwo", "clock": "virtual", "now": "2026-03-02T09:00:00.000Z", "services": 6 },
+        "max_ms": 1500
+      }
+    },
+    {
+      "name": "and the seeded board is three open against one closed",
+      "do": "GET /incidents",
+      "expect": { "status": 200, "json": { "total": 4, "items.0.key": "INC-4004", "items.0.severity": "sev1" } }
+    }
+  ]
+}

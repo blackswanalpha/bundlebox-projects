@@ -8,6 +8,7 @@ Three directories, each with a different job.
 | | what it is | what it proves |
 |---|---|---|
 | `sampleone/` | an ecommerce platform — catalogue, cart, checkout, orders, admin | the whole factory against one service, **measured**: 32,080 tokens of source and log answered in 869, and four real defects the unit tests did not reach, found by the corpus over the wire. [Its README carries every number](sampleone/README.md), and [the HTML monitor](sampleone/monitor/index.html) is built from the artefacts |
+| `sampletwo/` | an on-call incident service — alert intake, deduplication, rotations, escalation on a clock that can be moved, and a console | the same factory against a service whose defects are **ordering and timing**: 60,300 tokens of source and log answered in 519, and a snooze that moved only the next escalation step — found by the corpus, invisible to 26 passing unit tests. [Its README carries every number](sampletwo/README.md) |
 | `demo/` | a real service and the UI in front of it | the full pipeline — `scan → compile → route → run` — against code that exists, and `bb cookbook` against the process while it runs |
 | `designlabs/` | a declared design system and the gate that holds it | that a design system can be checked by a parse, and that what a parse cannot settle is reported `unknown` |
 | `tokenlab/` | a task service, and a harness that measures `bb bench` across trees of known size | that the packed arm is CONSTANT while the bare arm pays for the repository — 3.9k tokens whether the tree is 12 files or 400 |

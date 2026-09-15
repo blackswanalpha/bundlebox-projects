@@ -1,0 +1,56 @@
+{
+  "id": "answer-being-a-responder-is-not-authority",
+  "surface": "answer",
+  "severity": "high",
+  "title": "a responder answers what is theirs and what they are on call for, and nothing else",
+  "question": "can somebody who is not on call take a page that is not theirs?",
+  "rule": [
+    "mayAnswer asks who is on call, not merely who is logged in — src/auth.js",
+    "401 is 'I do not know who you are'; 403 is 'I know, and that is not enough'.",
+    "PRD rule 9."
+  ],
+  "steps": [
+    {
+      "name": "an alert on a core service pages nadia, who holds that pager",
+      "do": "POST /alerts",
+      "as": "nadia",
+      "body": { "service": "checkout-api", "dedup_key": "latency-p99", "severity": "sev2", "summary": "p99 above 2s for 6 minutes" },
+      "expect": { "status": 201, "json": { "incident.assignee": "nadia" } },
+      "save": { "inc": "incident.key" }
+    },
+    {
+      "name": "no token is 401, which is a different sentence from the next one",
+      "do": "POST /incidents/{{inc}}/ack",
+      "expect": { "status": 401 }
+    },
+    {
+      "name": "tomas is a real responder, next in the rotation, and still not the one holding this",
+      "do": "POST /incidents/{{inc}}/ack",
+      "as": "tomas",
+      "expect": { "status": 403 }
+    },
+    {
+      "name": "nadia takes it",
+      "do": "POST /incidents/{{inc}}/ack",
+      "as": "nadia",
+      "expect": { "status": 200, "json": { "state": "acknowledged", "ack_by": "nadia", "next_escalation_ms": null } }
+    },
+    {
+      "name": "a second acknowledgement is a conflict — somebody already has it",
+      "do": "POST /incidents/{{inc}}/ack",
+      "as": "wren",
+      "expect": { "status": 409 }
+    },
+    {
+      "name": "and the timeline carries one acknowledgement, not two",
+      "do": "GET /incidents/{{inc}}",
+      "expect": { "status": 200, "json": { "state": "acknowledged", "ack_by": "nadia" } }
+    },
+    {
+      "name": "an incident nobody opened is 404 rather than 403",
+      "do": "POST /incidents/INC-9999/ack",
+      "as": "wren",
+      "expect": { "status": 404 }
+    }
+  ]
+}

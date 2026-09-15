@@ -1,0 +1,20 @@
+{
+  "groups": {
+    "api": ["sampletwo"],
+    "all": ["sampletwo"]
+  },
+  "services": [
+    {
+      "id": "sampletwo",
+      "group": "api",
+      "cmd": "node src/server.js",
+      "cwd": ".",
+      "port": 8600,
+      "health": "http://127.0.0.1:8600/health",
+      "memory": "256M",
+      "cpu": "100%",
+      "boot": 15,
+      "env": { "PORT": "8600" }
+    }
+  ]
+}

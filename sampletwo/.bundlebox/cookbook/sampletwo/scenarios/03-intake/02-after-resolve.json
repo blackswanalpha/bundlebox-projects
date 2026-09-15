@@ -1,0 +1,48 @@
+{
+  "id": "intake-resolved-never-absorbs",
+  "surface": "intake",
+  "severity": "high",
+  "title": "the same symptom after a fix is new information",
+  "question": "does a returning alert get swallowed by the incident somebody already closed?",
+  "rule": [
+    "A resolved incident never absorbs — src/incidents.js",
+    "PRD rule 3."
+  ],
+  "steps": [
+    {
+      "name": "an alert opens one",
+      "do": "POST /alerts",
+      "as": "imani",
+      "body": { "service": "media-cdn", "dedup_key": "origin-5xx", "severity": "sev2", "summary": "Origin returning 5xx for 3% of requests" },
+      "expect": { "status": 201 },
+      "save": { "first": "incident.key" }
+    },
+    {
+      "name": "imani holds platform, so imani may close it",
+      "do": "POST /incidents/{{first}}/resolve",
+      "as": "imani",
+      "body": { "note": "origin pool restarted" },
+      "expect": { "status": 200, "json": { "state": "resolved" } }
+    },
+    {
+      "name": "the same key coming back opens a second incident rather than reopening the first",
+      "do": "POST /alerts",
+      "as": "imani",
+      "body": { "service": "media-cdn", "dedup_key": "origin-5xx", "severity": "sev2", "summary": "Origin returning 5xx for 3% of requests" },
+      "expect": { "status": 201, "json": { "deduped": false } },
+      "save": { "second": "incident.key" }
+    },
+    {
+      "name": "and the closed one stays closed, with one resolve on its timeline",
+      "do": "GET /incidents/{{first}}",
+      "expect": { "status": 200, "json": { "state": "resolved" } }
+    },
+    {
+      "name": "closing what is already closed is a conflict, not a second close",
+      "do": "POST /incidents/{{first}}/resolve",
+      "as": "imani",
+      "body": {},
+      "expect": { "status": 409 }
+    }
+  ]
+}

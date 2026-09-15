@@ -1,0 +1,78 @@
+{
+  "id": "escalation-runs-on-the-clock",
+  "surface": "escalation",
+  "severity": "high",
+  "title": "five minutes unanswered reaches the next name, and every step a jump passed fires in order",
+  "question": "does an unanswered page actually move, and does it move at the minute the policy says?",
+  "rule": [
+    "Offsets are from the OPEN instant — dueAt, src/policy.js",
+    "A clock that jumps must fire every step it passed, in order — tick, src/engine.js",
+    "PRD rules 5 and 6."
+  ],
+  "steps": [
+    {
+      "name": "start from the seed, so the minutes below are the policy's and not the last scenario's",
+      "do": "POST /admin/reset",
+      "as": "wren",
+      "expect": { "status": 200, "json": { "incidents": 4 } }
+    },
+    {
+      "name": "a sev1 on a tier 1 service pages nadia and schedules step 1",
+      "do": "POST /alerts",
+      "as": "nadia",
+      "body": { "service": "checkout-api", "dedup_key": "5xx-rate", "severity": "sev1", "summary": "5xx rate above 2% on the checkout path" },
+      "expect": { "status": 201, "json": { "incident.assignee": "nadia", "incident.step": 0 } },
+      "save": { "inc": "incident.key" }
+    },
+    {
+      "name": "four minutes of silence fires nothing, because the policy says five",
+      "do": "POST /admin/clock",
+      "as": "wren",
+      "body": { "advance_minutes": 4 },
+      "expect": { "status": 200, "json_len_at_most": { "fired": 0 } }
+    },
+    {
+      "name": "the sixth minute reaches tomas, who is next up in the core rotation",
+      "do": "POST /admin/clock",
+      "as": "wren",
+      "body": { "advance_minutes": 2 },
+      "expect": { "status": 200, "json": { "fired.0.incident": "{{inc}}", "fired.0.kind": "escalation", "fired.0.step": 1, "fired.0.responder": "R2" } }
+    },
+    {
+      "name": "and the board agrees that it moved",
+      "do": "GET /incidents/{{inc}}",
+      "expect": { "status": 200, "json": { "assignee": "tomas", "step": 1 } }
+    },
+    {
+      "name": "the last step of a tier 1 policy is the commander, and it fires at fifteen minutes",
+      "do": "POST /admin/clock",
+      "as": "wren",
+      "body": { "advance_minutes": 10 },
+      "expect": { "status": 200, "json": { "fired.0.step": 2, "fired.0.responder": "R4" } }
+    },
+    {
+      "name": "a policy that has run out stops rather than repeating forever",
+      "do": "GET /incidents/{{inc}}",
+      "expect": { "status": 200, "json": { "assignee": "wren", "step": 2, "next_escalation_ms": null } }
+    },
+    {
+      "name": "the outbox holds one page per step and no duplicates",
+      "do": "GET /notifications?incident={{inc}}",
+      "expect": { "status": 200, "json": { "total": 3, "items.0.reason": "page", "items.1.reason": "escalation", "items.2.responder": "wren" } }
+    },
+    {
+      "name": "time runs forward here, and asking for less is refused rather than silently ignored",
+      "do": "POST /admin/clock",
+      "as": "wren",
+      "body": { "advance_minutes": -10 },
+      "expect": { "status": 422 }
+    },
+    {
+      "name": "and moving the clock is a commander's act",
+      "do": "POST /admin/clock",
+      "as": "nadia",
+      "body": { "advance_minutes": 5 },
+      "expect": { "status": 403 }
+    }
+  ]
+}

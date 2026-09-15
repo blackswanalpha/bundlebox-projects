@@ -1,0 +1,147 @@
+{
+  "id": "snooze-delays-rather-than-cancels",
+  "surface": "snooze",
+  "severity": "high",
+  "title": "a snoozed page comes back",
+  "question": "is snooze a button that quiets the pager, or a button that does nothing?",
+  "rule": [
+    "Snooze postpones escalation BY the snooze, keeping the warning the holder had left — src/incidents.js",
+    "The wake and the delayed step are separate instants, so neither depends on which tick ran first.",
+    "Only an unanswered page can be snoozed.",
+    "PRD rule 10."
+  ],
+  "steps": [
+    {
+      "name": "back to the seed instant",
+      "do": "POST /admin/reset",
+      "as": "wren",
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "a sev1 pages nadia",
+      "do": "POST /alerts",
+      "as": "nadia",
+      "body": {
+        "service": "checkout-api",
+        "dedup_key": "slow-query",
+        "severity": "sev1",
+        "summary": "Query p95 above 900ms on the orders table"
+      },
+      "expect": {
+        "status": 201
+      },
+      "save": {
+        "inc": "incident.key"
+      }
+    },
+    {
+      "name": "a duration that is not a duration is refused",
+      "do": "POST /incidents/{{inc}}/snooze",
+      "as": "nadia",
+      "body": {
+        "minutes": 0
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "name": "nadia snoozes it for twenty minutes",
+      "do": "POST /incidents/{{inc}}/snooze",
+      "as": "nadia",
+      "body": {
+        "minutes": 20
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "state": "triggered"
+        }
+      }
+    },
+    {
+      "name": "ten minutes on, the step that was due at five has not fired for this one",
+      "do": "POST /admin/clock",
+      "as": "wren",
+      "body": {
+        "advance_minutes": 10
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "it is still unanswered, still on step 0, and still asleep",
+      "do": "GET /incidents/{{inc}}",
+      "expect": {
+        "status": 200,
+        "json": {
+          "state": "triggered",
+          "step": 0
+        }
+      }
+    },
+    {
+      "name": "at twenty-one minutes it comes back, and says why",
+      "do": "POST /admin/clock",
+      "as": "wren",
+      "body": {
+        "advance_minutes": 11
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "fired.0.kind": "snooze-expired",
+          "fired.0.incident": "{{inc}}"
+        }
+      }
+    },
+    {
+      "name": "the outbox carries the page and the waking, in that order",
+      "do": "GET /notifications?incident={{inc}}",
+      "expect": {
+        "status": 200,
+        "json": {
+          "items.0.reason": "page",
+          "items.1.reason": "snooze-expired"
+        }
+      }
+    },
+    {
+      "name": "four minutes after the wake the delayed step fires, at the offset it always had",
+      "do": "POST /admin/clock",
+      "as": "wren",
+      "body": {
+        "advance_minutes": 4
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "fired.0.kind": "escalation",
+          "fired.0.step": 1
+        }
+      }
+    },
+    {
+      "name": "what somebody already owns cannot be snoozed: there is nothing to suppress",
+      "do": "POST /incidents/{{inc}}/ack",
+      "as": "wren",
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "so the button refuses rather than pretending",
+      "do": "POST /incidents/{{inc}}/snooze",
+      "as": "wren",
+      "body": {
+        "minutes": 10
+      },
+      "expect": {
+        "status": 409
+      }
+    }
+  ]
+}

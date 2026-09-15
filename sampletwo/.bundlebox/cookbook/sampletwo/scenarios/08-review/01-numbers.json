@@ -1,0 +1,70 @@
+{
+  "id": "review-measured-from-the-open-instant",
+  "surface": "review",
+  "severity": "medium",
+  "title": "acknowledgement and resolution are measured from when the incident opened",
+  "question": "does a service that escalated three times get to report a two-minute acknowledgement?",
+  "rule": [
+    "MTTA is from the OPEN instant, not from the last page — src/stats.js",
+    "An average over nothing is null rather than nought.",
+    "PRD rules 12 and 13."
+  ],
+  "steps": [
+    {
+      "name": "back to the seed, whose history is two acknowledgements at 120s and 60s and one close at 2460s",
+      "do": "POST /admin/reset",
+      "as": "wren",
+      "expect": { "status": 200 }
+    },
+    {
+      "name": "the seeded averages are those, and nothing else",
+      "do": "GET /stats",
+      "expect": { "status": 200, "json": { "open": 3, "resolved": 1, "mtta_s": 90, "mttr_s": 2460, "escalated_share_pct": 0 } }
+    },
+    {
+      "name": "a new page opens on platform",
+      "do": "POST /alerts",
+      "as": "imani",
+      "body": { "service": "media-cdn", "dedup_key": "edge-timeouts", "severity": "sev2", "summary": "Edge timeouts on two points of presence" },
+      "expect": { "status": 201 },
+      "save": { "inc": "incident.key" }
+    },
+    {
+      "name": "four minutes pass before anybody looks at it",
+      "do": "POST /admin/clock",
+      "as": "wren",
+      "body": { "advance_minutes": 4 },
+      "expect": { "status": 200 }
+    },
+    {
+      "name": "imani takes it, 240 seconds after it opened",
+      "do": "POST /incidents/{{inc}}/ack",
+      "as": "imani",
+      "expect": { "status": 200 }
+    },
+    {
+      "name": "so the average of 120, 60 and 240 is 140",
+      "do": "GET /stats",
+      "expect": { "status": 200, "json": { "mtta_s": 140, "open": 4, "acknowledged": 2 } }
+    },
+    {
+      "name": "two minutes later it is closed, 360 seconds after it opened",
+      "do": "POST /admin/clock",
+      "as": "wren",
+      "body": { "advance_minutes": 2 },
+      "expect": { "status": 200 }
+    },
+    {
+      "name": "closed",
+      "do": "POST /incidents/{{inc}}/resolve",
+      "as": "imani",
+      "body": { "note": "traffic shifted away from both points of presence" },
+      "expect": { "status": 200, "json": { "state": "resolved" } }
+    },
+    {
+      "name": "and the resolution average is the mean of 2460 and 360",
+      "do": "GET /stats",
+      "expect": { "status": 200, "json": { "resolved": 2, "mttr_s": 1410, "open": 3 } }
+    }
+  ]
+}

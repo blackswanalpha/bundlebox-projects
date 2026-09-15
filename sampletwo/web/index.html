@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Relay — on-call console</title>
+<meta name="description" content="Who is on call, what is paging, and how long it has been unanswered.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap">
+<link rel="stylesheet" href="/console.css">
+</head>
+<body>
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <!-- One stroke weight, one 20-unit grid, one join style. Drawn here rather
+       than pulled from a set so the console owns its own marks. -->
+  <symbol id="i-page" viewBox="0 0 20 20"><path d="M10 3.2c-2.4 0-4 1.8-4 4v3l-1.4 2.4h10.8L14 10.2v-3c0-2.2-1.6-4-4-4Z"/><path d="M8.4 14.8a1.7 1.7 0 0 0 3.2 0"/><path d="M10 1.8v1.4"/></symbol>
+  <symbol id="i-ack" viewBox="0 0 20 20"><path d="m4.4 10.4 3.4 3.4 7.8-8"/></symbol>
+  <symbol id="i-resolve" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.6"/><path d="m7 10.2 2.2 2.2 4-4.4"/></symbol>
+  <symbol id="i-snooze" viewBox="0 0 20 20"><path d="M15.6 12.2A6.4 6.4 0 0 1 7.4 4a6.6 6.6 0 1 0 8.2 8.2Z"/></symbol>
+  <symbol id="i-escalate" viewBox="0 0 20 20"><path d="M10 15.4V5"/><path d="m5.8 9 4.2-4.2L14.2 9"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.8"/><path d="M10 6v4.2l2.8 1.8"/></symbol>
+  <symbol id="i-handoff" viewBox="0 0 20 20"><path d="M3 7.6h11.2"/><path d="m11.4 4.8 2.8 2.8-2.8 2.8"/><path d="M17 12.4H5.8"/><path d="m8.6 15.2-2.8-2.8 2.8-2.8"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 20 20"><path d="M10 3.4 2.8 16h14.4L10 3.4Z"/><path d="M10 8.2v3.4"/><path d="M10 13.6v.6"/></symbol>
+  <symbol id="i-contrast" viewBox="0 0 20 20"><circle cx="10" cy="10" r="6.8"/><path d="M10 3.2v13.6a6.8 6.8 0 0 0 0-13.6Z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-person" viewBox="0 0 20 20"><circle cx="10" cy="7.4" r="3"/><path d="M4.4 16.4c.6-2.8 2.9-4.4 5.6-4.4s5 1.6 5.6 4.4"/></symbol>
+</svg>
+
+<header class="masthead">
+  <a class="wordmark" href="/">Relay<span class="wordmark-dot"></span></a>
+  <p class="standfirst">On-call for six services, three rotations, one pager.</p>
+
+  <div class="clock" id="clock">
+    <svg class="ico" aria-hidden="true"><use href="#i-clock"/></svg>
+    <span class="clock-kind" id="clock-kind">service clock</span>
+    <span class="clock-time" id="clock-time">—</span>
+  </div>
+
+  <button class="control theme" id="theme" type="button" aria-label="Switch to the dark console">
+    <svg class="ico" aria-hidden="true"><use href="#i-contrast"/></svg>
+  </button>
+
+  <label class="who" for="me">
+    <span class="who-label">Signed in</span>
+    <select id="me" class="control"></select>
+  </label>
+</header>
+
+<section class="shift" aria-label="Shift summary">
+  <ul class="rota" id="rota"></ul>
+  <dl class="figures" id="figures"></dl>
+</section>
+
+<main class="console">
+  <section class="queue" aria-labelledby="queue-title">
+    <div class="queue-head">
+      <h2 id="queue-title">Queue</h2>
+      <div class="segmented" role="group" id="filters" aria-label="Filter the queue"></div>
+    </div>
+    <ol class="rows" id="rows" aria-live="polite"></ol>
+    <p class="queue-foot" id="queue-foot"></p>
+  </section>
+
+  <section class="detail" id="detail" aria-labelledby="detail-title" aria-live="polite">
+    <h2 class="sr" id="detail-title">Incident</h2>
+  </section>
+</main>
+
+<div class="toast" id="toast" role="status" hidden></div>
+<script type="module" src="/console.js"></script>
+</body>
+</html>

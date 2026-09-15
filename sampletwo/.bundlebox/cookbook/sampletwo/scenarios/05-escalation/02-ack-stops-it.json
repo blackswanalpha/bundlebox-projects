@@ -1,0 +1,50 @@
+{
+  "id": "escalation-stops-when-somebody-takes-it",
+  "surface": "escalation",
+  "severity": "high",
+  "title": "acknowledgement is the only thing that stops the clock",
+  "question": "does taking a page actually stop the next phone from ringing?",
+  "rule": [
+    "Acknowledgement stops escalation and nothing else does — src/incidents.js",
+    "PRD rule 8."
+  ],
+  "steps": [
+    {
+      "name": "back to the seed instant",
+      "do": "POST /admin/reset",
+      "as": "wren",
+      "expect": { "status": 200 }
+    },
+    {
+      "name": "a page goes out",
+      "do": "POST /alerts",
+      "as": "nadia",
+      "body": { "service": "checkout-api", "dedup_key": "disk-full", "severity": "sev1", "summary": "Disk at 97% on two checkout nodes" },
+      "expect": { "status": 201 },
+      "save": { "inc": "incident.key" }
+    },
+    {
+      "name": "nadia takes it inside the first minute",
+      "do": "POST /incidents/{{inc}}/ack",
+      "as": "nadia",
+      "expect": { "status": 200, "json": { "next_escalation_ms": null } }
+    },
+    {
+      "name": "half an hour later nothing has rung for it",
+      "do": "POST /admin/clock",
+      "as": "wren",
+      "body": { "advance_minutes": 30 },
+      "expect": { "status": 200 }
+    },
+    {
+      "name": "it is still on step 0, still with nadia",
+      "do": "GET /incidents/{{inc}}",
+      "expect": { "status": 200, "json": { "step": 0, "assignee": "nadia", "state": "acknowledged" } }
+    },
+    {
+      "name": "and exactly one page was ever sent about it",
+      "do": "GET /notifications?incident={{inc}}",
+      "expect": { "status": 200, "json": { "total": 1 } }
+    }
+  ]
+}

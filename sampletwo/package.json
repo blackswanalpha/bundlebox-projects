@@ -1,0 +1,13 @@
+{
+  "name": "sampletwo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Relay — an on-call incident service that exists to measure bundlebox: alert intake, deduplication, rotations, escalation on a clock that can be moved, and a console, with no dependencies.",
+  "type": "module",
+  "engines": { "node": ">=20.0.0" },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js",
+    "seed": "node -e \"import('./src/store.js').then(async s=>{const {seed}=await import('./src/seed.js');s.reset(seed());console.log('seeded')})\""
+  }
+}
