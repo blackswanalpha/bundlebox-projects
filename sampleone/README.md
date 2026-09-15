@@ -79,7 +79,7 @@ a board about nothing.
 ```
 
 Seven of those surfaces are the API. The eighth is `storefront`, and it asks the
-browser what a customer actually sees — `bb dotty` over the Chrome DevTools
+browser what a customer sees — `bb dotty` over the Chrome DevTools
 Protocol, with the accessibility tree as the assertion target rather than a
 screenshot. A scenario reads like the others:
 
