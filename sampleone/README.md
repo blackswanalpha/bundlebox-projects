@@ -27,12 +27,20 @@ ways.
 
 | | tokens a session reads | how |
 |---|---|---|
-| without the factory | **32,080** | read the source (19,354) and the log (12,726) |
-| with it | **869** | five tables, each with file, line and evidence |
-| | **−97.3%** | and the five tables took 8.4 seconds and 0 model tokens |
+| without the factory | **22,244** | read the source (19,369) and the log (2,875) |
+| with it | **1,105** | five tables, each with file, line and evidence |
+| | **−95.0%** | and the five tables took 13 seconds and 0 model tokens |
 
-The 869 breaks down as: `bb scan` 17, `bb findings` 281, `bb cookbook run` 104,
-`bb runbook logs` 423, `bb runbook status` 44.
+The 1,105 breaks down as: `bb scan` 162, `bb findings` 327, `bb cookbook run`
+112, `bb runbook logs` 460, `bb runbook status` 44.
+
+Run `bb scan` a second time on an unchanged tree and its 162 becomes **17**: the
+fingerprint has not moved, so nothing is re-derived.
+
+The log here is **one** corpus run. An earlier version of this table quoted six
+of them — 12,726 tokens against 423, −96.7% — which is a better-looking number
+for the same mechanism. The ratio is a function of how much log there is, not of
+the digest, so the single run is the one quoted.
 
 ```bash
 bb scan && bb findings && bb cookbook run --base http://127.0.0.1:8500 \
@@ -44,17 +52,14 @@ bb scan && bb findings && bb cookbook run --base http://127.0.0.1:8500 \
 ### `bb scan` — the source, 0 tokens
 
 ```
-18 detectors · 74 ms · 9 findings · 0 model tokens
+18 detectors · 85 ms · 11 findings · 1 promotable · 0 model tokens
 ```
 
-Nine findings with file-and-line evidence: 8 `dead-exports` (modules exporting
-helpers nothing imports yet) and 1 `anti-slop` (a conditional empty spread in
-`web/app.js`). None promoted to a work unit, which is correct — one `info` hit
-of one rule is a note, and `bb compile` says `no work units — nothing promoted`
-rather than inventing work.
+Eleven findings with file-and-line evidence: `dead-exports` on the modules that
+export helpers nothing imports yet, one `anti-slop` hit in `web/app.js`, and a
+`doc-links` finding this README earned by growing.
 
-A second scan over an unchanged tree prints **one line, 17 tokens, 71 ms**: the
-fingerprint has not moved, so nothing is re-derived.
+A second scan over an unchanged tree prints **one line, 17 tokens, 73 ms**.
 
 ### `bb runbook up api --apply --wait` — a readiness gate, 0 tokens
 
@@ -121,26 +126,36 @@ counting how many were disabled. Counting made the assertion depend on what
 earlier surfaces had sold. The fix was an `aria-label` carrying the product
 name, and the scenario now asserts on the one button it means.
 
-### `bb runbook logs` — 27.6 kB of log as 29 rows
+### `bb runbook logs` — 7.2 kB of log as 33 rows
 
 ```
-496 lines · 0 E · 162 W · 29 distinct signatures · via kernel   (188 ms)
+133 lines · 0 E · 28 W · 33 distinct signatures · via kernel
 
 known failures
-  medium  auth-refused    ×24  A request was refused for identity. Expected in the auth scenarios…
-  low     card-declined   ×6   A payment was declined. Expected for a card ending 0000…
+  medium  auth-refused    ×4   A request was refused for identity. Expected in the auth scenarios…
+  low     card-declined   ×1   A payment was declined. Expected for a card ending 0000…
 
 top signatures
-  72  INFO POST /cart/lines # #ms
-  48  WARN POST P # #ms
-  36  WARN POST /checkout # #ms
+  INFO POST /cart/lines # #ms
+  WARN POST /checkout # #ms
+  INFO GET /products # #ms
 ```
 
 | | |
 |---|---|
-| the log, read whole | **12,726 tokens** |
-| the same log, digested | **423 tokens** |
-| | **−96.7%** |
+| the log, read whole | **2,875 tokens** |
+| the same log, digested | **460 tokens** |
+| | **−84.0%** |
+
+Six runs of the corpus instead of one make that −96.7%, for the same reason and
+with no change to the digest: the saving grows with the log, because the rows
+do not.
+
+The monitor page reports a slightly larger saving on the same log, because it
+counts the signature rows alone and this table counts everything
+`bb runbook logs` prints — the header, the totals line and the sentence at the
+bottom explaining what a signature is. Both are measured; they are measuring
+two different things, and the one here is the one a session reads.
 
 The second call reads **0 bytes**: a cursor per file means only what arrived
 since last time is read.
@@ -149,6 +164,53 @@ On a 3.9 MB, 40,000-line log the same op returns 5 signatures in **61 ms** in
 the Rust kernel against **196 ms** in the JavaScript port — 3.2× — and the
 second call in **3 ms**. Both engines are pinned to identical answers by
 `test/digest.test.js` in the bundlebox repo.
+
+### `bb dotty` — the screen, as rows, 0 tokens
+
+The seven API surfaces cannot see the page a customer opens. The eighth can:
+
+```
+$ bb dotty shot catalogue --url http://127.0.0.1:8500/
+  catalogue        ok  780x437  29.0kB  .bundlebox/var/dotty/…/catalogue.png
+  sampleOne  http://127.0.0.1:8500/
+    role       name                         
+    searchbox  Search the catalogue
+    button     Add Four-port hub to cart    disabled
+    button     Add USB-C cable, 2m to cart
+    …
+```
+
+The picture is for a person. The rows are what a session reads, and the gap is
+the point — measured on this page:
+
+| what a session could read to know this screen | tokens | |
+|---|---|---|
+| the raw accessibility tree, as CDP returns it | **28,059** | 211 nodes of protocol bookkeeping |
+| the rendered DOM | **1,812** | 5,020 bytes of markup |
+| `bb dotty`'s screen rows | **302** | 16 rows |
+| the PNG | — | 29 kB, and neither greppable nor diffable |
+
+**The raw accessibility tree is fifteen times the DOM here.** "Hand the model
+the accessibility tree" is bad advice unfiltered; the filtering is the whole
+value. `bb dotty` keeps the roles a customer can act on — button, link, textbox,
+heading, alert — and drops the rest, which is how 211 nodes become 16 rows and
+28k tokens become 302.
+
+Filtering to what a customer can act on is the same trade as a signature instead
+of a log line, one surface over.
+It also survives a CSS refactor, which a selector does not, and it can be
+compared with the frame taken ninety seconds ago, which an image cannot:
+
+```
+$ bb dotty during restock --reload -- curl -X POST …/admin/stock/p6 -d '{"stock":9}'
+  what changed: 1 appeared, 1 gone, 15 unchanged
+    +  button  Add Four-port hub to cart
+    -  button  Add Four-port hub to cart  disabled
+```
+
+A frame that came back single-coloured is marked **BLANK** and the verb exits 1.
+The check is a real one — inflate the PNG, reverse the scanline filters, compare
+a grid of pixels — not a guess at the file size.
 
 ### `bb recom` — the run that does not have to happen again
 

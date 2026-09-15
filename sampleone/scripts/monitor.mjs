@@ -62,7 +62,16 @@ try {
   const f = path.join(ROOT, ".bundlebox", "var", "logs", "sampleone.log");
   rawTokens = Math.round(fs.statSync(f).size / 3.3);
 } catch { /* no log yet */ }
-const digestTokens = digest ? Math.round(JSON.stringify(digest).length / 3.3) : 0;
+// The ROWS a reader consumes, not the JSON envelope around them. The envelope
+// carries per-file offsets, cursors and byte counts that exist to make the next
+// call cheap and that nobody reads — counting them understated the saving by
+// twelve points against the same figure in README.md, and two numbers claiming
+// the same thing must not disagree.
+const digestRows = digest
+  ? [...(digest.files || []).flatMap((f) => f.signatures || []).map((x) => `${x.n} ${x.sig}`),
+     ...(digest.buckets || []).map((b) => `${b.severity} ${b.id} x${b.n} ${b.says}`)].join("\n")
+  : "";
+const digestTokens = digestRows ? Math.round(digestRows.length / 4.2) : 0;
 
 const scenarios = board?.scenarios || [];
 const steps = scenarios.flatMap((s) => s.steps || []);
@@ -155,7 +164,7 @@ Built ${esc(new Date().toISOString())} by <code>node scripts/monitor.mjs</code>.
     <p class="w">distinct signatures</p></div>
   <div class="card ok"><p class="k">tokens spared</p>
     <p class="v">${rawTokens && digestTokens ? pct(rawTokens - digestTokens, rawTokens) : "—"}</p>
-    <p class="w">${n(rawTokens)} raw &rarr; ${n(digestTokens)} digested</p></div>
+    <p class="w">${n(rawTokens)} raw &rarr; ${n(digestTokens)} as signature rows</p></div>
   <div class="card"><p class="k">named failures</p><p class="v">${n((digest?.buckets || []).length)}</p>
     <p class="w">${(digest?.buckets || []).some((b) => b.severity === "high") ? "a high bucket fired" : "none high"}</p></div>
 </div>
