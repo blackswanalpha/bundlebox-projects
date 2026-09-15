@@ -1,0 +1,11 @@
+[
+  { "id": "health", "title": "Health", "why": "is it up, and which clock is it on" },
+  { "id": "oncall", "title": "On call", "why": "who holds each pager, now and at any instant" },
+  { "id": "intake", "title": "Intake", "why": "one symptom is one incident, and a worse one is not a repeat" },
+  { "id": "answer", "title": "Answer", "why": "who may take a page, and what a second one costs" },
+  { "id": "escalation", "title": "Escalation", "why": "the clock moves and the page reaches somebody else" },
+  { "id": "snooze", "title": "Snooze", "why": "delayed, not cancelled" },
+  { "id": "command", "title": "Command", "why": "the two verbs only a commander has" },
+  { "id": "review", "title": "Review", "why": "the numbers a post-incident meeting argues about" },
+  { "id": "console", "title": "Console", "why": "what the browser shows, which the API scenarios cannot see" }
+]

@@ -1,0 +1,80 @@
+{
+  "id": "intake-one-symptom-one-incident",
+  "surface": "intake",
+  "severity": "high",
+  "title": "a monitor firing over and over is one incident and one page",
+  "question": "does a repeat open a second incident, and does it ring a second phone?",
+  "rule": [
+    "An alert joins the open incident with the same dedup_key on the same service — src/incidents.js",
+    "A repeat may raise, never lower.",
+    "PRD rules 2, 3 and 4."
+  ],
+  "steps": [
+    {
+      "name": "the first alert opens an incident and pages whoever holds that service's pager",
+      "do": "POST /alerts",
+      "as": "nadia",
+      "body": { "service": "billing-jobs", "dedup_key": "invoice-lag", "severity": "sev2", "summary": "Invoice generation 22 minutes behind" },
+      "expect": { "status": 201, "json": { "deduped": false, "incident.state": "triggered", "incident.assignee": "imani", "incident.alert_count": 1 } },
+      "save": { "inc": "incident.key" }
+    },
+    {
+      "name": "the same symptom thirty seconds later is the same incident",
+      "do": "POST /alerts",
+      "as": "nadia",
+      "body": { "service": "billing-jobs", "dedup_key": "invoice-lag", "severity": "sev2", "summary": "Invoice generation 23 minutes behind" },
+      "expect": { "status": 200, "json": { "deduped": true, "incident.key": "{{inc}}", "incident.alert_count": 2 } }
+    },
+    {
+      "name": "and it rang nobody a second time",
+      "do": "GET /notifications?incident={{inc}}",
+      "expect": { "status": 200, "json": { "total": 1, "items.0.reason": "page", "items.0.responder": "imani" } }
+    },
+    {
+      "name": "a repeat that is worse is not a repeat: it raises and pages again",
+      "do": "POST /alerts",
+      "as": "nadia",
+      "body": { "service": "billing-jobs", "dedup_key": "invoice-lag", "severity": "sev1", "summary": "Invoice generation stopped" },
+      "expect": { "status": 200, "json": { "deduped": true, "incident.severity": "sev1" } }
+    },
+    {
+      "name": "the second page says why it rang",
+      "do": "GET /notifications?incident={{inc}}",
+      "expect": { "status": 200, "json": { "total": 2, "items.1.reason": "raise" } }
+    },
+    {
+      "name": "a quieter repeat never lowers what somebody already accepted",
+      "do": "POST /alerts",
+      "as": "nadia",
+      "body": { "service": "billing-jobs", "dedup_key": "invoice-lag", "severity": "sev3", "summary": "Invoice generation 4 minutes behind" },
+      "expect": { "status": 200, "json": { "incident.severity": "sev1" } }
+    },
+    {
+      "name": "an alert with no dedup key is refused, because without one every repeat opens a new incident",
+      "do": "POST /alerts",
+      "as": "nadia",
+      "body": { "service": "billing-jobs", "dedup_key": "", "severity": "sev2", "summary": "Something is wrong" },
+      "expect": { "status": 422 }
+    },
+    {
+      "name": "so is a severity the board does not have",
+      "do": "POST /alerts",
+      "as": "nadia",
+      "body": { "service": "billing-jobs", "dedup_key": "x", "severity": "urgent", "summary": "Something is wrong" },
+      "expect": { "status": 422 }
+    },
+    {
+      "name": "and a service nobody monitors",
+      "do": "POST /alerts",
+      "as": "nadia",
+      "body": { "service": "ghost-service", "dedup_key": "x", "severity": "sev2", "summary": "Something is wrong" },
+      "expect": { "status": 404 }
+    },
+    {
+      "name": "a page anybody could send is a pager nobody answers",
+      "do": "POST /alerts",
+      "body": { "service": "billing-jobs", "dedup_key": "y", "severity": "sev1", "summary": "Anonymous alert" },
+      "expect": { "status": 401 }
+    }
+  ]
+}

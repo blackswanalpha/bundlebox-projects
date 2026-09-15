@@ -1,0 +1,50 @@
+{
+  "id": "console-refuses-on-screen-rather-than-on-submit",
+  "surface": "console",
+  "severity": "high",
+  "title": "an action the viewer may not take is drawn disabled, with the incident named on it",
+  "question": "does the screen agree with the authorisation rule, or does it let somebody press and then fail?",
+  "rule": [
+    "web/console.js mirrors mayAnswer in `refusal`, and draws the control disabled with the reason on it,",
+    "rather than hiding it or letting the press come back 403.",
+    "The accessible name carries the incident key — `Acknowledge INC-4004` — because three buttons all",
+    "named `Acknowledge` are indistinguishable to a screen reader AND to this corpus."
+  ],
+  "steps": [
+    {
+      "name": "a browser is listening, or nothing below this is about the screen",
+      "run": "bb dotty targets --json",
+      "expect": { "rc": 0, "json_present": ["browser"] },
+      "precondition": true
+    },
+    {
+      "name": "back to the seed, so the console is showing the board this scenario describes",
+      "do": "POST /admin/reset",
+      "as": "wren",
+      "expect": { "status": 200, "json": { "incidents": 4 } }
+    },
+    {
+      "name": "the API says the live one is a sev1 on checkout-api",
+      "do": "GET /incidents?severity=sev1",
+      "expect": { "status": 200, "json": { "total": 1, "items.0.key": "INC-4004", "items.0.service": "checkout-api" } }
+    },
+    {
+      "name": "and the screen names that incident on its acknowledge control, disabled for a viewer who has not signed in",
+      "run": "bb dotty shot console --url {{base}}/ --json",
+      "expect": {
+        "rc": 0,
+        "contains": {
+          "screen": { "role": "button", "name": "Acknowledge INC-4004", "disabled": true }
+        }
+      }
+    },
+    {
+      "name": "the board is a queue rather than a page of cards, and says so",
+      "run": "bb dotty shot console --url {{base}}/ --json",
+      "expect": {
+        "rc": 0,
+        "contains": { "screen": { "role": "heading", "name": "QUEUE" } }
+      }
+    }
+  ]
+}

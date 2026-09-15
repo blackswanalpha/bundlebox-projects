@@ -1,0 +1,59 @@
+{
+  "title": "Relay — the shift, the one who is not on it, and the commander",
+  "who": "nadia holds the core pager at the seed instant, tomas is next up and therefore the name an escalation reaches, imani holds platform, and wren is the only commander. Four actors is the whole point: authority here is who is on call at an instant, and a corpus that runs as one responder cannot tell that apart from being logged in.",
+  "base": "http://127.0.0.1:8600",
+  "timezone": "UTC",
+  "tz_offset_minutes": 0,
+  "rpm": 600,
+  "parallel": 1,
+  "timeout_ms": 8000,
+  "headers": { "content-type": "application/json" },
+  "vars": {},
+  "actors": {
+    "nadia": { "headers": { "authorization": "Bearer {{nadia_token}}" } },
+    "tomas": { "headers": { "authorization": "Bearer {{tomas_token}}" } },
+    "imani": { "headers": { "authorization": "Bearer {{imani_token}}" } },
+    "wren": { "headers": { "authorization": "Bearer {{wren_token}}" } }
+  },
+  "setup": [
+    {
+      "name": "the service answers before anything claims to have tested it",
+      "do": "GET /health",
+      "expect": { "status": 200, "json": { "service": "sampletwo" }, "max_ms": 2000 }
+    },
+    {
+      "name": "the commander gets a token",
+      "do": "POST /auth/token",
+      "body": { "email": "wren@relay.test" },
+      "expect": { "status": 200, "json": { "role": "commander" } },
+      "save": { "wren_token": "token" }
+    },
+    {
+      "name": "the board is back at its seed, so every instant below is a fixed number",
+      "do": "POST /admin/reset",
+      "as": "wren",
+      "expect": { "status": 200, "json": { "incidents": 4, "services": 6, "responders": 4 } }
+    },
+    {
+      "name": "nadia gets a token",
+      "do": "POST /auth/token",
+      "body": { "email": "nadia@relay.test" },
+      "expect": { "status": 200, "json": { "role": "responder", "handle": "nadia" } },
+      "save": { "nadia_token": "token", "nadia_id": "responder_id" }
+    },
+    {
+      "name": "tomas gets a token",
+      "do": "POST /auth/token",
+      "body": { "email": "tomas@relay.test" },
+      "expect": { "status": 200, "json": { "handle": "tomas" } },
+      "save": { "tomas_token": "token", "tomas_id": "responder_id" }
+    },
+    {
+      "name": "imani gets a token",
+      "do": "POST /auth/token",
+      "body": { "email": "imani@relay.test" },
+      "expect": { "status": 200, "json": { "handle": "imani" } },
+      "save": { "imani_token": "token", "imani_id": "responder_id" }
+    }
+  ]
+}

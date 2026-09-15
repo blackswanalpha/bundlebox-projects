@@ -71,7 +71,14 @@ floors are now 5, and both are config (`designlabs.generic_min`).
 
 ## Open
 
-None. O1 — the Windows path bug in `git commit` — turned out to be the first of
+Two, both found by building `sampletwo/` (Relay) with the tool, 2026-09-15.
+
+| # | gap | how it showed up | what it costs |
+|---|---|---|---|
+| O5 | a routed lane whose `cwd` equals its `worktree` is spawned into a directory nothing created | `bb route` inside `sampletwo/` — a project directory with no git of its own — wrote a lane with `cwd` and `worktree` both set to `sampletwo.worktrees/<run>-l01`. `ensureWorktree` returns early on `wt === lane.cwd` with the note "shared checkout" and creates nothing, so `bb run --apply` spawned the agent in a path that does not exist. The spawn's ENOENT was reported as **`rc 127 (binary not found: claude)`** over a `claude` that is on `PATH` and that `bb bridge` had used successfully four minutes earlier | `bb run --apply` cannot run from inside a project of this workspace at all, and the message sends the reader to look at their agent install |
+| O6 | `bb bridge report` says `$0.00` after a call that cost `$1.1010` | the call's `result` stream carries `total_cost_usd` and a full `usage` block; `call.json` still holds `spent_tokens: null`, and the row prints a stale `refused_why` from an earlier attempt beside `state: done`. `bb session` reads the same call correctly and reports `billed 2.0M $1.1010 MEASURED` | the one verb whose job is to say what a call cost is the one that says nothing; two views of the same call disagree |
+
+O1 — the Windows path bug in `git commit` — turned out to be the first of
 nine, all now fixed and merged; CI is green on Windows, macOS and Linux across
 Node 20, 22 and 24. The one that mattered most was not O1 at all: `laneEnv`
 handed a spawned lane no `PATH`, and the acceptance gate hard-coded `bash`, so

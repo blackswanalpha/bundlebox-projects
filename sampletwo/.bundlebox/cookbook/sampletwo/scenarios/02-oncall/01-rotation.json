@@ -1,0 +1,42 @@
+{
+  "id": "oncall-is-arithmetic",
+  "surface": "oncall",
+  "severity": "high",
+  "title": "who holds the pager is computed, at any instant, including before the rotation began",
+  "question": "can the board say who was responsible at 04:00, or only who is responsible now?",
+  "rule": [
+    "A start instant, a shift length and an ordered list — onCallAt, src/schedule.js",
+    "Shifts before the start instant are answered rather than refused.",
+    "PRD rule 7."
+  ],
+  "steps": [
+    {
+      "name": "at the seed instant nadia holds core and tomas is the next name an escalation reaches",
+      "do": "GET /oncall",
+      "expect": {
+        "status": 200,
+        "json": { "rotations.0.rotation_id": "ROT-core", "rotations.0.on_call": "nadia", "rotations.0.next_up": "tomas", "rotations.0.handoff_in_s": 21600 }
+      }
+    },
+    {
+      "name": "platform is a longer shift and a different holder",
+      "do": "GET /oncall",
+      "expect": { "status": 200, "json": { "rotations.1.rotation_id": "ROT-platform", "rotations.1.on_call": "imani", "rotations.1.shift_hours": 24 } }
+    },
+    {
+      "name": "seven hours on, the core pager has changed hands without anybody storing that it did",
+      "do": "GET /oncall?at=1772467200000",
+      "expect": { "status": 200, "json": { "rotations.0.on_call": "tomas", "rotations.0.next_up": "imani" } }
+    },
+    {
+      "name": "and nine hours BEFORE the rotation started it still has a holder, because that is what a review asks",
+      "do": "GET /oncall?at=1772409600000",
+      "expect": { "status": 200, "json": { "rotations.0.on_call": "imani" } }
+    },
+    {
+      "name": "an instant that is not an instant is refused rather than guessed",
+      "do": "GET /oncall?at=lunchtime",
+      "expect": { "status": 422 }
+    }
+  ]
+}

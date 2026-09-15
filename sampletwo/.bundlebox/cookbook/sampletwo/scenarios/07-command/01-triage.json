@@ -1,0 +1,83 @@
+{
+  "id": "command-the-two-verbs-only-a-commander-has",
+  "surface": "command",
+  "severity": "high",
+  "title": "re-grading and handing over are a commander's, and a board where nothing is downgraded is a board nobody trusts",
+  "question": "can the responder who is holding an incident promote it themselves?",
+  "rule": [
+    "Only a commander changes severity or assignee — src/server.js, src/incidents.js",
+    "A commander may lower a severity as well as raise it — setSeverity, src/incidents.js",
+    "PRD rules 4 and 9."
+  ],
+  "steps": [
+    {
+      "name": "back to the seed instant",
+      "do": "POST /admin/reset",
+      "as": "wren",
+      "expect": { "status": 200 }
+    },
+    {
+      "name": "a sev3 opens on a core service",
+      "do": "POST /alerts",
+      "as": "nadia",
+      "body": { "service": "checkout-api", "dedup_key": "cache-miss", "severity": "sev3", "summary": "Cache hit rate down to 41%" },
+      "expect": { "status": 201, "json": { "incident.severity": "sev3", "incident.assignee": "nadia" } },
+      "save": { "inc": "incident.key" }
+    },
+    {
+      "name": "nadia is holding it and still cannot promote it",
+      "do": "POST /incidents/{{inc}}/severity",
+      "as": "nadia",
+      "body": { "severity": "sev1" },
+      "expect": { "status": 403 }
+    },
+    {
+      "name": "the commander can, and the page that follows says it was raised",
+      "do": "POST /incidents/{{inc}}/severity",
+      "as": "wren",
+      "body": { "severity": "sev1" },
+      "expect": { "status": 200, "json": { "severity": "sev1" } }
+    },
+    {
+      "name": "and can put it back down after triage, which is the half most boards will not do",
+      "do": "POST /incidents/{{inc}}/severity",
+      "as": "wren",
+      "body": { "severity": "sev2" },
+      "expect": { "status": 200, "json": { "severity": "sev2" } }
+    },
+    {
+      "name": "re-grading it to what it already is says so rather than writing a second entry",
+      "do": "POST /incidents/{{inc}}/severity",
+      "as": "wren",
+      "body": { "severity": "sev2" },
+      "expect": { "status": 409 }
+    },
+    {
+      "name": "handing it to somebody is the same authority",
+      "do": "POST /incidents/{{inc}}/assign",
+      "as": "nadia",
+      "body": { "responder": "tomas" },
+      "expect": { "status": 403 }
+    },
+    {
+      "name": "the commander hands it to tomas, and tomas is told",
+      "do": "POST /incidents/{{inc}}/assign",
+      "as": "wren",
+      "body": { "responder": "tomas" },
+      "expect": { "status": 200, "json": { "assignee": "tomas" } }
+    },
+    {
+      "name": "a name nobody added to the directory is 404, not a silent no-op",
+      "do": "POST /incidents/{{inc}}/assign",
+      "as": "wren",
+      "body": { "responder": "ghost" },
+      "expect": { "status": 404 }
+    },
+    {
+      "name": "and now that it is his, tomas may take it",
+      "do": "POST /incidents/{{inc}}/ack",
+      "as": "tomas",
+      "expect": { "status": 200, "json": { "ack_by": "tomas" } }
+    }
+  ]
+}
