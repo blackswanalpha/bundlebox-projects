@@ -40,7 +40,7 @@ async function loadCatalogue(q = "") {
       <strong>${p.name}</strong>
       <span class="price">${money(p.price_cents)}</span>
       <span class="${p.stock ? "" : "out"}">${p.stock ? `${p.stock} in stock` : "Out of stock"}</span>
-      <button data-add="${p.id}" ${p.stock ? "" : "disabled"}>Add to cart</button>
+      <button data-add="${p.id}" aria-label="Add ${p.name} to cart" ${p.stock ? "" : "disabled"}>Add to cart</button>
     </li>`).join("");
 }
 

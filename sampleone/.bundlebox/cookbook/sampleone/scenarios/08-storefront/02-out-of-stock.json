@@ -1,0 +1,97 @@
+{
+  "id": "storefront-shows-the-empty-shelf",
+  "surface": "storefront",
+  "severity": "high",
+  "title": "the one product with no stock is disabled on screen, not merely refused on submit",
+  "question": "does the screen agree with the shelf, or does it let a customer try and then fail?",
+  "rule": [
+    "web/app.js renders `<button aria-label=\"Add <name> to cart\" ... ${p.stock ? '' : 'disabled'}>`,",
+    "so stock 0 is a disabled control rather than a request that comes back 422.",
+    "The aria-label exists because ten buttons all named `Add to cart` are indistinguishable to a",
+    "screen reader AND to this corpus \u2014 naming the product is what lets a scenario assert on ONE of",
+    "them instead of counting how many are disabled, which would depend on what earlier surfaces sold."
+  ],
+  "steps": [
+    {
+      "name": "a browser is listening, or nothing below this is about the product",
+      "run": "bb dotty targets --json",
+      "expect": {
+        "rc": 0,
+        "json_present": [
+          "browser"
+        ]
+      },
+      "precondition": true
+    },
+    {
+      "name": "the operator has a token",
+      "do": "POST /auth/token",
+      "body": {
+        "email": "ops@sampleone.test"
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "role": "admin"
+        }
+      },
+      "save": {
+        "ops": "token"
+      }
+    },
+    {
+      "name": "empty the hub, so this scenario is about the screen and not about what ran before it",
+      "do": "POST /admin/stock/p6",
+      "as": "ops",
+      "body": {
+        "stock": 0
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 0
+        }
+      }
+    },
+    {
+      "name": "the API says exactly one product is out of stock",
+      "do": "GET /products?size=50",
+      "expect": {
+        "status": 200,
+        "contains": {
+          "items": {
+            "sku": "HUB-04",
+            "stock": 0
+          }
+        }
+      }
+    },
+    {
+      "name": "and the screen disables that product's button, by name",
+      "run": "bb dotty shot out-of-stock --url {{base}}/ --json",
+      "expect": {
+        "rc": 0,
+        "contains": {
+          "screen": {
+            "role": "button",
+            "name": "Add Four-port hub to cart",
+            "disabled": true
+          }
+        }
+      }
+    },
+    {
+      "name": "while a product that is in stock is not disabled",
+      "run": "bb dotty shot in-stock --url {{base}}/ --json",
+      "expect": {
+        "rc": 0,
+        "contains": {
+          "screen": {
+            "role": "button",
+            "name": "Add USB-C cable, 2m to cart"
+          }
+        }
+      }
+    }
+  ]
+}
