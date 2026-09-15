@@ -1,0 +1,15 @@
+{
+  "name": "bundlebox-demo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A small real service and its UI. Exists so bundlebox has something honest to scan, compile, route and run against.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js",
+    "lint": "node scripts/lint.js"
+  },
+  "engines": { "node": ">=20.0.0" },
+  "dependencies": {}
+}

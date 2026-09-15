@@ -1,0 +1,116 @@
+{
+  "id": "checkout-names-every-problem-at-once",
+  "surface": "checkout",
+  "severity": "high",
+  "title": "an incomplete order is refused with every reason, not one per attempt",
+  "question": "how many round trips does it take a customer to learn what is wrong?",
+  "rule": [
+    "addressProblems returns a LIST; checkout concatenates address and payment problems \u2014 src/orders.js",
+    "PRD rule 9. One field at a time is a form the customer submits five times."
+  ],
+  "steps": [
+    {
+      "name": "an empty cart cannot check out",
+      "do": "POST /checkout",
+      "as": "ada",
+      "body": {
+        "address": {
+          "name": "Ada",
+          "line1": "1 Main",
+          "city": "Nairobi",
+          "postcode": "00100",
+          "country": "KE"
+        },
+        "payment": {
+          "method": "card",
+          "last4": "4242"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "json": {
+          "error": "the cart is empty"
+        }
+      }
+    },
+    {
+      "name": "something in the cart",
+      "do": "POST /cart/lines",
+      "as": "ada",
+      "body": {
+        "product_id": "p2",
+        "qty": 1
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "four missing address fields arrive together",
+      "do": "POST /checkout",
+      "as": "ada",
+      "body": {
+        "address": {
+          "name": "Ada"
+        },
+        "payment": {
+          "method": "card",
+          "last4": "4242"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "json_len_at_least": {
+          "problems": 4
+        }
+      }
+    },
+    {
+      "name": "a three-letter country is refused",
+      "do": "POST /checkout",
+      "as": "ada",
+      "body": {
+        "address": {
+          "name": "Ada",
+          "line1": "1 Main",
+          "city": "Nairobi",
+          "postcode": "00100",
+          "country": "KEN"
+        },
+        "payment": {
+          "method": "card",
+          "last4": "4242"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "json": {
+          "problems.0.field": "country"
+        }
+      }
+    },
+    {
+      "name": "a card with no last four is refused",
+      "do": "POST /checkout",
+      "as": "ada",
+      "body": {
+        "address": {
+          "name": "Ada",
+          "line1": "1 Main",
+          "city": "Nairobi",
+          "postcode": "00100",
+          "country": "KE"
+        },
+        "payment": {
+          "method": "card"
+        }
+      },
+      "expect": {
+        "status": 422,
+        "json": {
+          "problems.0.in": "payment"
+        }
+      }
+    }
+  ]
+}

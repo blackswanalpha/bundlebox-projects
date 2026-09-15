@@ -1,0 +1,57 @@
+{
+ "id": "items-write-read",
+ "surface": "items",
+ "severity": "high",
+ "title": "what an item is once it is stored",
+ "question": "does a create round-trip?",
+ "rule": [
+  "POST /items returns 201 with version 1 and an id of the shape it-<n>"
+ ],
+ "steps": [
+  {
+   "name": "create",
+   "do": "POST /items",
+   "body": {
+    "title": "audit {{run}}",
+    "due": "{{+2d}}"
+   },
+   "expect": {
+    "status": 201,
+    "json": {
+     "version": 1
+    },
+    "json_matches": {
+     "id": "^it-[0-9]+$"
+    }
+   },
+   "save": {
+    "item": "id"
+   }
+  },
+  {
+   "name": "read it back \u2014 a 201 that stored nothing looks identical from here",
+   "do": "GET /items/{{item}}",
+   "expect": {
+    "status": 200,
+    "json": {
+     "id": "{{item}}"
+    },
+    "max_ms": 500
+   }
+  },
+  {
+   "name": "it is in the list \u2014 the body is an envelope, not a bare array",
+   "do": "GET /items",
+   "expect": {
+    "json_len_at_least": {
+     "items": 1
+    },
+    "contains": {
+     "items": {
+      "id": "{{item}}"
+     }
+    }
+   }
+  }
+ ]
+}

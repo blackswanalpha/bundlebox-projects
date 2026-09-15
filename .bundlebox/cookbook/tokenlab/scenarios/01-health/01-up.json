@@ -1,0 +1,27 @@
+{
+ "id": "tl-up",
+ "surface": "health",
+ "severity": "high",
+ "title": "the service answers and says what it is",
+ "question": "is it up, and does it identify itself?",
+ "rule": [
+  "GET /health returns 200 with {ok: true, service: \"tokenlab\"} and an uptime in seconds."
+ ],
+ "steps": [
+  {
+   "name": "it answers",
+   "do": "GET /health",
+   "expect": {
+    "status": 200,
+    "json": {
+     "ok": true,
+     "service": "tokenlab"
+    },
+    "json_present": [
+     "uptime_s"
+    ],
+    "max_ms": 2000
+   }
+  }
+ ]
+}

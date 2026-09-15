@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demo — Task tracker</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<section class="hero">
+  <h1>A task list that stays out of your way</h1>
+  <p>Add what needs doing, give it a due date if it has one, and filter by open, doing, or done. Nothing here syncs anywhere else.</p>
+  <button class="btn" id="cta">Add your first task</button>
+  <button class="btn secondary">See how it works</button>
+</section>
+
+<div class="wrap">
+  <div class="panel">
+    <h2>Add an item</h2>
+    <form id="add">
+      <input type="text" id="title" placeholder="What needs doing?" maxlength="200">
+      <div style="height:8px"></div>
+      <input type="date" id="due">
+      <div style="height:8px"></div>
+      <button class="btn" type="submit">Add</button>
+      <span class="error" id="err"></span>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h2>Items <span class="muted" id="count"></span></h2>
+    <div id="filters">
+      <button class="chip" data-state="">All</button>
+      <button class="chip" data-state="open">Open</button>
+      <button class="chip" data-state="doing">Doing</button>
+      <button class="chip" data-state="done">Done</button>
+    </div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<footer>A demo of the items API. Nothing here leaves this tab.</footer>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "id": "01-up",
+  "surface": "health",
+  "severity": "high",
+  "title": "the service answers at all",
+  "question": "is it up, and does it say what it is?",
+  "rule": [
+    "Replace this with the behaviour as the CODE defines it, quoted, with the constant names and the file.",
+    "Without it a red step is an argument about what the corpus wants."
+  ],
+  "steps": [
+    {
+      "name": "it answers",
+      "do": "GET /health",
+      "expect": {
+        "status": 200,
+        "max_ms": 2000
+      }
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "id": "cart-coupon-applies-before-tax",
+  "surface": "cart",
+  "severity": "medium",
+  "title": "a discount is applied before tax, and floored",
+  "question": "does a coupon reduce the taxable amount, or only the line total?",
+  "rule": [
+    "money.totals: taxable = subtotal - discount + shipping \u2014 src/money.js",
+    "discount floors, so a discount can never round up and cost the customer more."
+  ],
+  "steps": [
+    {
+      "name": "two mice at 2450",
+      "do": "POST /cart/lines",
+      "as": "bo",
+      "body": {
+        "product_id": "p2",
+        "qty": 2
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "subtotal_cents": 4900
+        }
+      }
+    },
+    {
+      "name": "an unknown coupon is refused",
+      "do": "POST /cart/coupon",
+      "as": "bo",
+      "body": {
+        "code": "NOPE"
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "name": "SAVE10 takes 490 off, and tax is charged on what is left",
+      "do": "POST /cart/coupon",
+      "as": "bo",
+      "body": {
+        "code": "SAVE10"
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "discount_cents": 490,
+          "tax_cents": 413,
+          "total_cents": 5422
+        }
+      }
+    },
+    {
+      "name": "clear it for the next scenario",
+      "do": "PATCH /cart/lines/L1-p2",
+      "as": "bo",
+      "body": {
+        "qty": 0
+      },
+      "expect": {
+        "status": 200
+      }
+    }
+  ]
+}

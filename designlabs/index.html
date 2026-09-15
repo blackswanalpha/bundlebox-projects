@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>designlabs</title>
+<link rel="stylesheet" href="styles/tokens.css">
+<style>
+  .wrap { max-width: 1100px; margin: 0 auto; padding: var(--s-4) var(--s-3); }
+  header { border-bottom: 1px solid var(--hair); padding-bottom: var(--s-2); margin-bottom: var(--s-4); }
+  h1 { font-size: var(--f-display); margin: 0 0 var(--s-0); }
+  .dim { color: var(--dim); }
+  .cols { display: grid; grid-template-columns: minmax(0,1fr) 280px; gap: var(--s-5); align-items: start; }
+  @media (max-width: 720px) { .cols { grid-template-columns: minmax(0,1fr); } }
+  .pill { font: inherit; font-size: var(--f-small); min-height: 44px; padding: 0 var(--s-2);
+          background: transparent; color: var(--fg); border: 1px solid var(--edge);
+          border-radius: var(--r-pill); cursor: pointer; transition: background var(--t-state) var(--e-standard); }
+  .pill:hover { background: var(--panel); }
+  .pill[aria-pressed="true"] { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  #picker, #states { display: flex; flex-wrap: wrap; gap: var(--s-1); margin-bottom: var(--s-3); }
+  #stage { background: var(--panel); border: 1px solid var(--hair); border-radius: var(--r-surface); padding: var(--s-4); min-height: 320px; }
+  .state-badge { display: inline-block; font-size: var(--f-micro); letter-spacing: .08em; color: var(--dim); margin-bottom: var(--s-2); }
+  .skeleton { height: 20px; border-radius: var(--r-control); background: var(--hair); margin-bottom: var(--s-1); }
+  .token-row { display: flex; align-items: center; gap: var(--s-1); font-size: var(--f-small); margin-bottom: var(--s-0); }
+  .swatch { width: 20px; height: 20px; border-radius: var(--r-control); border: 1px solid var(--hair); flex: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>designlabs</h1>
+    <p class="dim">Rendered from <code>system.json</code> and <code>screens/*.json</code>. Nothing on this page is written twice.</p>
+  </header>
+  <div class="cols">
+    <main>
+      <div id="picker"></div>
+      <div id="states"></div>
+      <div id="stage"></div>
+    </main>
+    <aside>
+      <h3>Tokens</h3>
+      <div id="tokens"></div>
+    </aside>
+  </div>
+</div>
+<script src="scripts/studio.js"></script>
+</body>
+</html>

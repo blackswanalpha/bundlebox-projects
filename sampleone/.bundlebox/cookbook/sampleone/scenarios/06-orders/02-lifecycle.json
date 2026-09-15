@@ -1,0 +1,149 @@
+{
+  "id": "orders-move-forward-only",
+  "surface": "orders",
+  "severity": "high",
+  "title": "an order moves forward and never back, and cancelling restocks once",
+  "question": "can an order's history be rewritten, and can a double cancel invent inventory?",
+  "rule": [
+    "advance refuses a state at or before the current one, and refuses any move out of cancelled or delivered \u2014 src/orders.js",
+    "cancel is 409 the second time and restocks only on the first \u2014 src/orders.js",
+    "PRD rules 12 and 13."
+  ],
+  "steps": [
+    {
+      "name": "the stand has eighteen",
+      "do": "GET /products/p7",
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 18
+        }
+      }
+    },
+    {
+      "name": "Ada buys three",
+      "do": "POST /cart/lines",
+      "as": "ada",
+      "body": {
+        "product_id": "p7",
+        "qty": 3
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "and checks out",
+      "do": "POST /checkout",
+      "as": "ada",
+      "body": {
+        "address": {
+          "name": "Ada",
+          "line1": "1 Main",
+          "city": "Nairobi",
+          "postcode": "00100",
+          "country": "KE"
+        },
+        "payment": {
+          "method": "card",
+          "last4": "4242"
+        }
+      },
+      "expect": {
+        "status": 201
+      },
+      "save": {
+        "oid": "id"
+      }
+    },
+    {
+      "name": "fifteen are left",
+      "do": "GET /products/p7",
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 15
+        }
+      }
+    },
+    {
+      "name": "a customer cannot advance their own order",
+      "do": "POST /orders/{{oid}}/advance",
+      "as": "ada",
+      "body": {
+        "state": "shipped"
+      },
+      "expect": {
+        "status": 403
+      }
+    },
+    {
+      "name": "the operator ships it",
+      "do": "POST /orders/{{oid}}/advance",
+      "as": "ops",
+      "body": {
+        "state": "shipped"
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "state": "shipped"
+        }
+      }
+    },
+    {
+      "name": "and cannot put it back to paid",
+      "do": "POST /orders/{{oid}}/advance",
+      "as": "ops",
+      "body": {
+        "state": "paid"
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "name": "a shipped order cannot be cancelled",
+      "do": "POST /orders/{{oid}}/cancel",
+      "as": "ada",
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "name": "delivered is terminal",
+      "do": "POST /orders/{{oid}}/advance",
+      "as": "ops",
+      "body": {
+        "state": "delivered"
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "state": "delivered"
+        }
+      }
+    },
+    {
+      "name": "and nothing moves after it",
+      "do": "POST /orders/{{oid}}/advance",
+      "as": "ops",
+      "body": {
+        "state": "shipped"
+      },
+      "expect": {
+        "status": 409
+      }
+    },
+    {
+      "name": "the stand is still at fifteen: a delivered order does not restock",
+      "do": "GET /products/p7",
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 15
+        }
+      }
+    }
+  ]
+}

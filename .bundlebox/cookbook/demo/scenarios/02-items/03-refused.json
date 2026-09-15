@@ -1,0 +1,16 @@
+{"id":"items-refused","surface":"items","severity":"high","title":"what the product refuses, and whether it says why",
+ "rule":["POST /items with a blank title is 422 and names the field",
+         "POST /items with an unknown state is 422 and names the field",
+         "a refused write returns no id, so there is nothing to have stored"],
+ "steps":[
+  {"name":"a blank title is refused, and the field is named — an error that does not say WHICH field is a support ticket",
+   "do":"POST /items","body":{"title":"   "},
+   "expect":{"status":422,"json":{"field":"title"},"json_matches":{"error":"title"},"json_absent":["id"]}},
+  {"name":"a state the vocabulary does not have is refused, and the answer names the vocabulary",
+   "do":"POST /items","body":{"title":"real enough {{run}}","state":"pending"},
+   "expect":{"status":422,"json":{"field":"state"},"json_matches":{"error":"one of"},"json_absent":["id"]}},
+  {"name":"a title past the limit is refused by length, not truncated in silence",
+   "do":"POST /items","body":{"title":"x{{run}}0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"},
+   "expect":{"status":422,"json":{"field":"title"}}},
+  {"name":"the collection still answers after three refusals — a validator that wedges the store is worse than one that lets the row through",
+   "do":"GET /items","expect":{"status":200,"json_len_at_least":{"items":0},"max_ms":500}}]}

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sampleOne</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="/">sampleOne</a>
+  <form class="find" id="find" role="search">
+    <label class="sr" for="q">Search the catalogue</label>
+    <input id="q" name="q" type="search" placeholder="keyboard, dock, cable" autocomplete="off">
+    <button type="submit">Search</button>
+  </form>
+  <button id="open-cart" class="cart-btn" aria-expanded="false" aria-controls="cart">
+    Cart <span id="cart-count" class="count">0</span>
+  </button>
+</header>
+
+<main>
+  <section aria-labelledby="catalogue-h">
+    <h1 id="catalogue-h">Catalogue</h1>
+    <p id="catalogue-note" class="note" role="status"></p>
+    <ul id="catalogue" class="grid"></ul>
+  </section>
+</main>
+
+<aside id="cart" class="cart" hidden aria-label="Cart">
+  <h2>Cart</h2>
+  <ul id="cart-lines"></ul>
+  <dl id="cart-totals" class="totals"></dl>
+  <form id="checkout" hidden>
+    <h3>Delivery</h3>
+    <label for="name">Name</label><input id="name" name="name" autocomplete="name" required>
+    <label for="line1">Address</label><input id="line1" name="line1" autocomplete="address-line1" required>
+    <label for="city">City</label><input id="city" name="city" autocomplete="address-level2" required>
+    <label for="postcode">Postcode</label><input id="postcode" name="postcode" autocomplete="postal-code" required>
+    <label for="country">Country (2 letters)</label><input id="country" name="country" maxlength="2" autocomplete="country" required>
+    <h3>Payment</h3>
+    <label for="last4">Card, last four digits</label><input id="last4" name="last4" inputmode="numeric" pattern="\d{4}" required>
+    <p class="hint">Use 0000 to see a decline.</p>
+    <button type="submit">Place the order</button>
+    <p id="checkout-problems" class="problems" role="alert"></p>
+  </form>
+</aside>
+
+<script src="/app.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+[
+  {
+    "id": "health",
+    "title": "Health",
+    "why": "is it up at all"
+  },
+  {
+    "id": "tasks",
+    "title": "Tasks",
+    "why": "the thing the service is about"
+  },
+  {
+    "id": "refusals",
+    "title": "Refusals",
+    "why": "a 400 that does not say which field is a session to diagnose"
+  }
+]

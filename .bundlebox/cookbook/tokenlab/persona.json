@@ -1,0 +1,21 @@
+{
+  "title": "tokenlab",
+  "who": "a client of the task service \u2014 one anonymous caller",
+  "base": "http://127.0.0.1:8422",
+  "timezone": "UTC",
+  "tz_offset_minutes": 0,
+  "rpm": 0,
+  "parallel": 1,
+  "headers": {},
+  "vars": {},
+  "actors": {},
+  "setup": [
+    {
+      "name": "the service answers before anything claims to have tested it",
+      "do": "GET /health",
+      "expect": {
+        "status": 200
+      }
+    }
+  ]
+}

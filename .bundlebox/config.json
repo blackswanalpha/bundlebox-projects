@@ -1,0 +1,31 @@
+{
+  "lanes": {
+    "agent": "claude",
+    "model": "sonnet",
+    "max_parallel": 2,
+    "max_budget_usd": 2,
+    "daily_budget_usd": 10
+  },
+  "kernel": {
+    "gates": {
+      ".": {
+        "quick": "node designlabs/selftest/contract.mjs designlabs && node storybook/build.mjs factory && node storybook/build.mjs service",
+        "full": "node designlabs/selftest/contract.mjs designlabs && node storybook/build.mjs factory && node storybook/build.mjs service && bb designlabs check"
+      },
+      "demo": {
+        "quick": "npm test",
+        "full": "npm test"
+      }
+    }
+  },
+  "$schema": "https://github.com/blackswanalpha/bundlebox/blob/main/src/core/config.js",
+  "initialised": "2026-09-14",
+  "designlabs": {
+    "dir": "designlabs"
+  },
+  "workspace": {
+    "subrepos": [
+      "demo"
+    ]
+  }
+}

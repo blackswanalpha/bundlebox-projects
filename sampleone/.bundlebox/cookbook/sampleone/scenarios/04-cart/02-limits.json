@@ -1,0 +1,98 @@
+{
+  "id": "cart-quantity-limits",
+  "surface": "cart",
+  "severity": "medium",
+  "title": "a quantity is a whole number between 1 and 99",
+  "question": "what happens at each edge of the quantity rule?",
+  "rule": [
+    "cart.addLine: qty must be an integer >= 1 and <= MAX_QTY (99); setQty(0) removes \u2014 src/cart.js",
+    "PRD rule 4."
+  ],
+  "steps": [
+    {
+      "name": "zero is refused on add",
+      "do": "POST /cart/lines",
+      "as": "bo",
+      "body": {
+        "product_id": "p2",
+        "qty": 0
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "name": "a fraction is refused",
+      "do": "POST /cart/lines",
+      "as": "bo",
+      "body": {
+        "product_id": "p2",
+        "qty": 1.5
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "name": "past the ceiling is refused",
+      "do": "POST /cart/lines",
+      "as": "bo",
+      "body": {
+        "product_id": "p2",
+        "qty": 100
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "name": "an unknown product is a 404",
+      "do": "POST /cart/lines",
+      "as": "bo",
+      "body": {
+        "product_id": "p999",
+        "qty": 1
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "name": "one is accepted",
+      "do": "POST /cart/lines",
+      "as": "bo",
+      "body": {
+        "product_id": "p2",
+        "qty": 1
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "lines.0.qty": 1
+        }
+      }
+    },
+    {
+      "name": "setting zero removes the line",
+      "do": "PATCH /cart/lines/L1-p2",
+      "as": "bo",
+      "body": {
+        "qty": 0
+      },
+      "expect": {
+        "status": 200,
+        "json_len_at_most": {
+          "lines": 0
+        }
+      }
+    },
+    {
+      "name": "and a line that is gone is a 404",
+      "do": "DELETE /cart/lines/L1-p2",
+      "as": "bo",
+      "expect": {
+        "status": 404
+      }
+    }
+  ]
+}

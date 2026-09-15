@@ -1,0 +1,69 @@
+{
+  "id": "checkout-decline-releases-the-shelf",
+  "surface": "checkout",
+  "severity": "high",
+  "title": "a declined card leaves the shelf exactly as it found it",
+  "question": "does stock reserved for a payment that failed come back?",
+  "rule": [
+    "checkout reserves, then authorises; the authorise failure path calls catalog.release \u2014 src/orders.js",
+    "PRD rules 6 and 10. Without the release the shelf loses the stock and nothing puts it back."
+  ],
+  "steps": [
+    {
+      "name": "the webcam has twelve",
+      "do": "GET /products/p9",
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 12
+        }
+      }
+    },
+    {
+      "name": "Ada holds two",
+      "do": "POST /cart/lines",
+      "as": "ada",
+      "body": {
+        "product_id": "p9",
+        "qty": 2
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "the card ending 0000 is declined",
+      "do": "POST /checkout",
+      "as": "ada",
+      "body": {
+        "address": {
+          "name": "Ada",
+          "line1": "1 Main",
+          "city": "Nairobi",
+          "postcode": "00100",
+          "country": "KE"
+        },
+        "payment": {
+          "method": "card",
+          "last4": "0000"
+        }
+      },
+      "expect": {
+        "status": 402,
+        "json": {
+          "error": "card declined"
+        }
+      }
+    },
+    {
+      "name": "and the shelf still has twelve",
+      "do": "GET /products/p9",
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 12
+        }
+      }
+    }
+  ]
+}

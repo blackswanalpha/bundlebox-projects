@@ -1,0 +1,212 @@
+{
+  "id": "factory",
+  "title": "A zero-token software factory",
+  "thesis": "Every question a parse, a count, a path check or a set difference can answer is answered before the agent opens, and the agent is billed only for judgement.",
+  "falsified_by": "one orientation question the agent still has to ask that a static pass could have answered",
+  "unit": "one subsystem, with its contract, its states, its gate and its acceptance command",
+  "reference": {
+    "root": "../bundlebox",
+    "why": "The lanes are sized against a real implementation of this system rather than a guess. Every payload number below is measured off that tree by bb's own estimator, not asserted. The unwired orientation term is measured against that same tree: it is the thing a session has to survey when nothing hands it a brief.",
+    "scan": "src"
+  },
+  "contracts": [
+    "Finding",
+    "Unit",
+    "Lane",
+    "Episode",
+    "UsageRow"
+  ],
+  "gates": {
+    "quick": "npm run lint && npm test",
+    "full": "npm run lint && npm test && node bin/bb.js selftest"
+  },
+  "surfaces": [
+    {
+      "id": "scan",
+      "why": "what is wrong, with evidence, for nothing"
+    },
+    {
+      "id": "compile",
+      "why": "what to do about it, packed to one window"
+    },
+    {
+      "id": "route",
+      "why": "who does it, where, in what wave"
+    },
+    {
+      "id": "run",
+      "why": "the only verb that spends"
+    },
+    {
+      "id": "measure",
+      "why": "what a session used and was spared, separately"
+    }
+  ],
+  "lanes": [
+    {
+      "id": "L01",
+      "title": "the core: paths, config, fs, exec, store, util, args, log",
+      "writes": "src/core",
+      "reads": [
+        "CONVENTIONS.md"
+      ],
+      "owes": "one implementation per fact: one walker, one fingerprint, one estimator",
+      "acceptance": "npm run lint && node --test test/runner.test.js",
+      "wave": 1
+    },
+    {
+      "id": "L02",
+      "title": "the detectors and the shared corpus they all read once",
+      "writes": "src/detectors",
+      "reads": [
+        "CONVENTIONS.md",
+        "src/detectors/_shared.js",
+        "src/detectors/todo-census.js",
+        "src/core/fs.js",
+        "src/core/store.js"
+      ],
+      "owes": "every finding carries evidence and a key stable across runs; a detector that throws is a row, never a crash",
+      "acceptance": "node --test test/detectors.test.js test/scan.test.js",
+      "wave": 1
+    },
+    {
+      "id": "L03",
+      "title": "the local actuators that close what they can before a model is asked",
+      "writes": "src/actuators",
+      "reads": [
+        "src/detectors/_shared.js",
+        "src/detectors/debug-leftovers.js",
+        "src/core/fs.js"
+      ],
+      "owes": "a patch written to disk before a file is changed; dry run until --apply",
+      "acceptance": "node --test test/scan.test.js",
+      "wave": 1
+    },
+    {
+      "id": "L04",
+      "title": "compile: findings to units, packed to one window with quoted regions",
+      "writes": "src/compile",
+      "reads": [
+        "CONVENTIONS.md",
+        "src/core/config.js",
+        "src/tokens/estimate.js",
+        "src/detectors/index.js"
+      ],
+      "owes": "projected = overhead + brief + payload x churn + reserve, with each term shown",
+      "acceptance": "node --test test/compile.test.js",
+      "wave": 2
+    },
+    {
+      "id": "L05",
+      "title": "route: units to lanes and waves, conflicts as affinity",
+      "writes": "src/route",
+      "reads": [
+        "src/compile/compiler.js",
+        "src/core/config.js"
+      ],
+      "owes": "a split that respects directory locality, because locality is what a cache prefix is made of",
+      "acceptance": "node --test test/route.test.js",
+      "wave": 2
+    },
+    {
+      "id": "L06",
+      "title": "run: lanes on the chosen agent, env allowlist, acceptance as the verdict",
+      "writes": "src/run",
+      "reads": [
+        "src/route/index.js",
+        "src/adapters/index.js",
+        "src/core/exec.js"
+      ],
+      "owes": "the prompt and the command are written to disk before anything is spawned; unproven blocks --pr",
+      "acceptance": "node --test test/adapters.test.js",
+      "wave": 2
+    },
+    {
+      "id": "L07",
+      "title": "tokens: estimate, calibrate, probe, price, and the session bill",
+      "writes": "src/tokens",
+      "reads": [
+        "src/adapters/index.js",
+        "src/core/config.js",
+        "src/tokens/prices.js"
+      ],
+      "owes": "measured and estimated are never added and never printed the same way",
+      "acceptance": "node --test test/ledger.test.js",
+      "wave": 3
+    },
+    {
+      "id": "L08",
+      "title": "designlabs: the doctrine, the declared system and the gate that holds it",
+      "writes": "src/designlabs",
+      "reads": [
+        "src/detectors/_shared.js",
+        "src/kit/registry.js",
+        "src/kit/runner.js",
+        "src/core/config.js"
+      ],
+      "owes": "a rule a browser alone can settle reports unknown, never pass",
+      "acceptance": "node --test test/designlabs.test.js",
+      "wave": 3
+    },
+    {
+      "id": "L09",
+      "title": "wire: the instruction block, the MCP entry and the hooks, per agent",
+      "writes": "src/wire",
+      "reads": [
+        "src/adapters/index.js",
+        "src/core/fs.js"
+      ],
+      "owes": "unwire removes only its own blocks, byte for byte",
+      "acceptance": "node --test test/adapters.test.js",
+      "wave": 3
+    },
+    {
+      "id": "L10",
+      "title": "the CLI: one entrypoint, every verb, a broken module is a row not a crash",
+      "writes": "src/cli.js",
+      "reads": [
+        "CONVENTIONS.md",
+        "src/core/args.js",
+        "src/core/log.js"
+      ],
+      "owes": "every verb is a dry run until --apply; only run and bridge send can spend",
+      "acceptance": "npm run lint && npm test",
+      "wave": 1
+    }
+  ],
+  "target_tokens": 350000,
+  "target_note": "The budget one wave of this build is allowed to occupy, agent-side, through the wire. A wave over it is SPLIT, not accepted with a bigger number.",
+  "waves": [
+    {
+      "n": 1,
+      "title": "the zero-token spine",
+      "lanes": [
+        "L01",
+        "L02",
+        "L03",
+        "L10"
+      ],
+      "why": "nothing downstream can be sized until a parse can say what is wrong and what it costs"
+    },
+    {
+      "n": 2,
+      "title": "packing and dispatch",
+      "lanes": [
+        "L04",
+        "L05",
+        "L06"
+      ],
+      "why": "findings become units, units become lanes, lanes become the only verb that spends"
+    },
+    {
+      "n": 3,
+      "title": "measuring and wiring",
+      "lanes": [
+        "L07",
+        "L08",
+        "L09"
+      ],
+      "why": "what a session used and was spared, and how the factory installs itself into every agent"
+    }
+  ]
+}

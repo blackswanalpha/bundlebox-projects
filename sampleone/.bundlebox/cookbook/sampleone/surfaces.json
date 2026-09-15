@@ -1,0 +1,37 @@
+[
+  {
+    "id": "health",
+    "title": "Health",
+    "why": "is it up, and does it say what it is"
+  },
+  {
+    "id": "catalogue",
+    "title": "Catalogue",
+    "why": "can a customer find what they came for"
+  },
+  {
+    "id": "auth",
+    "title": "Auth",
+    "why": "who is asking, and what that buys them"
+  },
+  {
+    "id": "cart",
+    "title": "Cart",
+    "why": "the arithmetic a customer checks against the receipt"
+  },
+  {
+    "id": "checkout",
+    "title": "Checkout",
+    "why": "stock and money, together, or neither"
+  },
+  {
+    "id": "orders",
+    "title": "Orders",
+    "why": "whose order is it, and where can it go"
+  },
+  {
+    "id": "admin",
+    "title": "Admin",
+    "why": "the only role that moves stock"
+  }
+]

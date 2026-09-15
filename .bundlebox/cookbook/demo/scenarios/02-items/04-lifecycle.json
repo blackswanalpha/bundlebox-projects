@@ -1,0 +1,112 @@
+{
+ "id": "items-lifecycle",
+ "surface": "items",
+ "severity": "high",
+ "title": "an item moves through its states and then leaves",
+ "rule": [
+  "PATCH /items/{id} advances state and bumps version",
+  "DELETE /items/{id} is 204 and the item is then 404",
+  "PATCH and DELETE on an unknown id are both 404"
+ ],
+ "steps": [
+  {
+   "name": "create, with a due date \u2014 `due` is nullable, so a shape check needs one set",
+   "do": "POST /items",
+   "body": {
+    "title": "lifecycle {{run}}",
+    "due": "{{+2d}}"
+   },
+   "expect": {
+    "status": 201,
+    "json": {
+     "state": "open",
+     "version": 1
+    }
+   },
+   "save": {
+    "it": "id"
+   }
+  },
+  {
+   "name": "advance it",
+   "do": "PATCH /items/{{it}}",
+   "body": {
+    "state": "doing"
+   },
+   "expect": {
+    "status": 200,
+    "json": {
+     "state": "doing",
+     "version": 2
+    },
+    "max_ms": 500
+   }
+  },
+  {
+   "name": "advance again \u2014 version counts edits, not states",
+   "do": "PATCH /items/{{it}}",
+   "body": {
+    "state": "done"
+   },
+   "expect": {
+    "status": 200,
+    "json": {
+     "state": "done",
+     "version": 3
+    }
+   }
+  },
+  {
+   "name": "the wire shape is the wire shape, whatever the store holds",
+   "do": "GET /items/{{it}}",
+   "expect": {
+    "status": 200,
+    "json_present": [
+     "id",
+     "title",
+     "due",
+     "state",
+     "version",
+     "created",
+     "updated"
+    ],
+    "json_absent": [
+     "_id",
+     "password",
+     "raw"
+    ]
+   }
+  },
+  {
+   "name": "remove it",
+   "do": "DELETE /items/{{it}}",
+   "expect": {
+    "status": 204
+   }
+  },
+  {
+   "name": "and it is gone, not merely hidden",
+   "do": "GET /items/{{it}}",
+   "expect": {
+    "status": 404
+   }
+  },
+  {
+   "name": "deleting what is not there is 404, never 204",
+   "do": "DELETE /items/nope",
+   "expect": {
+    "status": 404
+   }
+  },
+  {
+   "name": "patching what is not there is 404, never a silent create",
+   "do": "PATCH /items/nope",
+   "body": {
+    "state": "done"
+   },
+   "expect": {
+    "status": 404
+   }
+  }
+ ]
+}

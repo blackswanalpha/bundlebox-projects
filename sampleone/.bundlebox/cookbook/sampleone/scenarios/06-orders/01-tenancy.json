@@ -1,0 +1,93 @@
+{
+  "id": "orders-tenancy-holds",
+  "surface": "orders",
+  "severity": "high",
+  "title": "Bo cannot read Ada's order, and the 404 does not confirm it exists",
+  "question": "does an order id belonging to somebody else leak that it is real?",
+  "rule": [
+    "getOrder returns 404 when !owns(actor, order) \u2014 src/server.js",
+    "PRD rule 11. A 403 confirms the id exists, which is the whole of an enumeration attack."
+  ],
+  "steps": [
+    {
+      "name": "Ada buys a cable",
+      "do": "POST /cart/lines",
+      "as": "ada",
+      "body": {
+        "product_id": "p4",
+        "qty": 1
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "and checks out",
+      "do": "POST /checkout",
+      "as": "ada",
+      "body": {
+        "address": {
+          "name": "Ada",
+          "line1": "1 Main",
+          "city": "Nairobi",
+          "postcode": "00100",
+          "country": "KE"
+        },
+        "payment": {
+          "method": "card",
+          "last4": "4242"
+        }
+      },
+      "expect": {
+        "status": 201
+      },
+      "save": {
+        "oid": "id"
+      }
+    },
+    {
+      "name": "Ada reads her own order",
+      "do": "GET /orders/{{oid}}",
+      "as": "ada",
+      "expect": {
+        "status": 200,
+        "json": {
+          "state": "paid"
+        }
+      }
+    },
+    {
+      "name": "Bo asking for it gets a 404 with the same body a missing id gets",
+      "do": "GET /orders/{{oid}}",
+      "as": "bo",
+      "expect": {
+        "status": 404,
+        "json": {
+          "error": "no such order"
+        }
+      }
+    },
+    {
+      "name": "and an id that never existed gets exactly the same thing",
+      "do": "GET /orders/ORD-999999",
+      "as": "bo",
+      "expect": {
+        "status": 404,
+        "json": {
+          "error": "no such order"
+        }
+      }
+    },
+    {
+      "name": "Bo's own list does not contain it",
+      "do": "GET /orders",
+      "as": "bo",
+      "expect": {
+        "status": 200,
+        "json_absent": [
+          "items.0.id"
+        ]
+      }
+    }
+  ]
+}

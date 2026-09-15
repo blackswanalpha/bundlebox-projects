@@ -1,0 +1,73 @@
+/* tokens.css — DERIVED from system.json by `bb designlabs init`.
+   Do not edit. Change system.json and re-run `bb designlabs init --apply`. */
+:root {
+  color-scheme: light dark;
+  --c-paper: #FAF8F3;
+  --c-surface: #F1EEE5;
+  --c-ink: #14170F;
+  --c-muted: #5A5F52;
+  --c-border: #74786B;
+  --c-rule: #DCD7C9;
+  --c-accent: #2F5D50;
+  --c-danger: #8C2F1D;
+  --c-night: #12140F;
+  --c-night-surface: #1B1E18;
+  --c-night-ink: #EDEBE3;
+  --c-night-muted: #9AA091;
+  --c-night-border: #787C6E;
+  --c-night-accent: #7FBFA6;
+  --s-0: 4px;
+  --s-1: 8px;
+  --s-2: 12px;
+  --s-3: 20px;
+  --s-4: 32px;
+  --s-5: 52px;
+  --s-6: 84px;
+  --r-control: 6px;
+  --r-surface: 18px;
+  --r-pill: 999px;
+  --t-instant: 90ms;
+  --t-state: 160ms;
+  --t-enter: 240ms;
+  --t-sheet: 320ms;
+  --e-standard: cubic-bezier(0.2, 0, 0, 1);
+  --e-exit: cubic-bezier(0.4, 0, 1, 1);
+  --f-micro: 12px;
+  --f-small: 14px;
+  --f-body: 16px;
+  --f-lead: 19px;
+  --f-title: 25px;
+  --f-display: 38px;
+  --z-resting: none;
+  --z-raised: 0 1px 2px rgba(20,23,15,0.10), 0 0 0 1px rgba(20,23,15,0.05);
+  --z-floating: 0 12px 32px rgba(20,23,15,0.18);
+  --font-display: "Fraunces", Georgia, serif;
+  --font-text: "Public Sans", Helvetica, Arial, sans-serif;
+
+  --bg: var(--c-paper); --fg: var(--c-ink); --dim: var(--c-muted);
+  --panel: var(--c-surface); --edge: var(--c-border); --hair: var(--c-rule);
+  --accent: var(--c-accent);
+}
+:root[data-theme="dark"] {
+  --bg: var(--c-night); --fg: var(--c-night-ink); --dim: var(--c-night-muted);
+  --panel: var(--c-night-surface); --edge: var(--c-night-border); --hair: #2A2E26;
+  --accent: var(--c-night-accent);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: var(--c-night); --fg: var(--c-night-ink); --dim: var(--c-night-muted);
+    --panel: var(--c-night-surface); --edge: var(--c-night-border); --hair: #2A2E26;
+    --accent: var(--c-night-accent);
+  }
+}
+/* Doherty: nothing here outlasts 400ms, and reduced motion removes it entirely. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
+/* Norman: a control with no signifier is silent, so :focus-visible is styled
+   everywhere :hover is, and never removed without a replacement. */
+:where(a, button, [role="button"], input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px;
+}
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-text); font-size: var(--f-body); line-height: 1.55; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: -0.015em; }

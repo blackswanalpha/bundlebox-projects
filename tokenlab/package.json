@@ -1,0 +1,14 @@
+{
+  "name": "tokenlab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A service to point bundlebox at, and a harness that measures what bundlebox saves as a function of tree size.",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js",
+    "lab": "node bench/run.mjs",
+    "trees": "node bench/generate.mjs"
+  },
+  "engines": { "node": ">=20.0.0" }
+}

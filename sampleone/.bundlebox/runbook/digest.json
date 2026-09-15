@@ -1,0 +1,16 @@
+[
+  { "id": "port-in-use", "severity": "high", "match": "(EADDRINUSE|address already in use)",
+    "says": "8500 is already held. A previous run did not stop; `bb runbook down all --apply` first." },
+  { "id": "server-5xx", "severity": "high", "match": "ERROR (GET|POST|PATCH|DELETE) /.* 5[0-9][0-9] ",
+    "says": "A handler threw. Every scenario below this line is measuring the throw, not the product." },
+  { "id": "oversell", "severity": "high", "match": "not enough stock",
+    "says": "A reserve was short. Expected in the last-unit scenario; anywhere else the catalogue and the cart disagree." },
+  { "id": "card-declined", "severity": "low", "match": "402 ",
+    "says": "A payment was declined. Expected for a card ending 0000; the stock release path runs on this." },
+  { "id": "auth-refused", "severity": "medium", "match": "(401|403) ",
+    "says": "A request was refused for identity. Expected in the auth scenarios; unexpected elsewhere means a token expired mid-run." },
+  { "id": "db-torn", "severity": "high", "match": "(Unexpected token|is not valid JSON|ENOENT.*db\\.json)",
+    "says": "var/db.json could not be read. Re-seed with `npm run seed` before reading anything from this run." },
+  { "id": "oom-kill", "severity": "high", "match": "(heap out of memory|Killed process|oom-kill)",
+    "says": "Killed for memory. The 256M cage is too small for what this run asked of it." }
+]

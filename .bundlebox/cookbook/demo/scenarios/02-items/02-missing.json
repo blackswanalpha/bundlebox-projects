@@ -1,0 +1,3 @@
+{"id":"items-missing","surface":"items","severity":"medium","title":"a missing item says which one",
+ "rule":["GET /items/{id} on an unknown id is 404 and names the id"],
+ "steps":[{"name":"404","do":"GET /items/nope","expect":{"status":404,"json":{"error":"no such item","id":"nope"}}}]}

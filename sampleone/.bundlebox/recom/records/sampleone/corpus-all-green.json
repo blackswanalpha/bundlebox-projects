@@ -1,0 +1,28 @@
+{
+  "id": "sampleone/corpus-all-green",
+  "title": "The 14-scenario corpus runs green against a live sampleOne",
+  "outcome": "works",
+  "summary": "76 of 76 steps pass against http://127.0.0.1:8500 in 8s and 81 requests. Every surface is at 100%, including the tenancy 404, the last-unit 409 and the decline release.",
+  "steps": [
+    "bb runbook up api --apply --wait — up and answering after 2 probes, 488ms",
+    "bb cookbook run --base http://127.0.0.1:8500 — 76 passed, 0 red, 8s",
+    "the four defects the first run found are fixed: 401-vs-403 on a forged token, fractional qty truncation in cart and catalog, and DELETE /cart/lines/:id shadowed by the PATCH row"
+  ],
+  "evidence": [
+    ".bundlebox/var/boards/",
+    "monitor/index.html"
+  ],
+  "depends": [
+    "git_paths:.:src/server.js,src/cart.js,src/catalog.js,src/orders.js,src/auth.js,src/money.js",
+    "git_paths:.:.bundlebox/cookbook/sampleone/persona.json",
+    "http:http://127.0.0.1:8500/health"
+  ],
+  "fingerprint": {
+    "git_paths:.:src/server.js,src/cart.js,src/catalog.js,src/orders.js,src/auth.js,src/money.js": "2e703b83145f5393",
+    "git_paths:.:.bundlebox/cookbook/sampleone/persona.json": "59eff825971dcb32",
+    "http:http://127.0.0.1:8500/health": "200"
+  },
+  "saved_wall_s": 600,
+  "saved_tokens": 24000,
+  "recorded": "2026-09-15T09:09:47.655Z"
+}

@@ -1,0 +1,29 @@
+{
+  "id": "health-up",
+  "surface": "health",
+  "severity": "high",
+  "title": "the service answers and names itself",
+  "question": "is it up, and is it the version the board is about?",
+  "rule": [
+    "GET /health returns {ok, service, version, uptime_s, products, orders} \u2014 src/server.js:health()",
+    "A board against a service that is not up is a board about nothing."
+  ],
+  "steps": [
+    {
+      "name": "it answers",
+      "do": "GET /health",
+      "expect": {
+        "status": 200,
+        "json": {
+          "ok": true,
+          "service": "sampleone"
+        },
+        "json_present": [
+          "version",
+          "uptime_s"
+        ],
+        "max_ms": 1000
+      }
+    }
+  ]
+}

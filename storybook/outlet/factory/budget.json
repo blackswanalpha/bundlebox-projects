@@ -1,0 +1,278 @@
+{
+  "story": "factory",
+  "measured_against": "../bundlebox",
+  "terms": {
+    "overhead_lean": {
+      "v": 29200,
+      "src": "MEASURED on the bundlebox reference workspace (README: opening window under the lean flag stack)"
+    },
+    "overhead_full": {
+      "v": 44300,
+      "src": "MEASURED on the same workspace with no flag stack"
+    },
+    "churn": {
+      "v": 2.4,
+      "src": "config budget.churn_factor, refit by `bb tokens calibrate`"
+    },
+    "widen": {
+      "v": 0.45,
+      "src": "config budget.anchor_widen: the fraction of the rest of an anchored file a unit is budgeted to also read"
+    },
+    "window": {
+      "v": 160000,
+      "src": "config budget.max_tokens"
+    },
+    "region": {
+      "v": 0.25,
+      "src": "ASSUMED: the share of a neighbour module that is actually the contract. Lower it and the wired total falls."
+    },
+    "survey": {
+      "lo": 0.15,
+      "hi": 0.35,
+      "src": "ASSUMED range: the share of the reference tree a session opens to find what a packed brief would have handed it. This term is the whole thesis — an agent is billed for what it reads, and most of what it reads is orientation, not judgement."
+    }
+  },
+  "lanes": [
+    {
+      "id": "L01",
+      "title": "the core: paths, config, fs, exec, store, util, args, log",
+      "writes": "src/core",
+      "reads": [
+        "CONVENTIONS.md"
+      ],
+      "owes": "one implementation per fact: one walker, one fingerprint, one estimator",
+      "acceptance": "npm run lint && node --test test/runner.test.js",
+      "wave": 1,
+      "write": 14067,
+      "readFull": 2229,
+      "readWired": 1309.5375000000001,
+      "brief": 4104,
+      "wired": 50513.89,
+      "unwiredLo": 134206.25,
+      "unwiredHi": 272492.44999999995,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 1,
+      "sessionsUnwiredHi": 2
+    },
+    {
+      "id": "L02",
+      "title": "the detectors and the shared corpus they all read once",
+      "writes": "src/detectors",
+      "reads": [
+        "CONVENTIONS.md",
+        "src/detectors/_shared.js",
+        "src/detectors/todo-census.js",
+        "src/core/fs.js",
+        "src/core/store.js"
+      ],
+      "owes": "every finding carries evidence and a key stable across runs; a detector that throws is a row, never a crash",
+      "acceptance": "node --test test/detectors.test.js test/scan.test.js",
+      "wave": 1,
+      "write": 46615,
+      "readFull": 13723,
+      "readWired": 8062.262500000001,
+      "brief": 4258,
+      "wired": 99422.43,
+      "unwiredLo": 238639.84999999998,
+      "unwiredHi": 332626.05,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 2,
+      "sessionsUnwiredHi": 3
+    },
+    {
+      "id": "L03",
+      "title": "the local actuators that close what they can before a model is asked",
+      "writes": "src/actuators",
+      "reads": [
+        "src/detectors/_shared.js",
+        "src/detectors/debug-leftovers.js",
+        "src/core/fs.js"
+      ],
+      "owes": "a patch written to disk before a file is changed; dry run until --apply",
+      "acceptance": "node --test test/scan.test.js",
+      "wave": 1,
+      "write": 6181,
+      "readFull": 10633,
+      "readWired": 6246.8875,
+      "brief": 4181,
+      "wired": 54554.53,
+      "unwiredLo": 146489.84999999998,
+      "unwiredHi": 284776.05,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 1,
+      "sessionsUnwiredHi": 2
+    },
+    {
+      "id": "L04",
+      "title": "compile: findings to units, packed to one window with quoted regions",
+      "writes": "src/compile",
+      "reads": [
+        "CONVENTIONS.md",
+        "src/core/config.js",
+        "src/tokens/estimate.js",
+        "src/detectors/index.js"
+      ],
+      "owes": "projected = overhead + brief + payload x churn + reserve, with each term shown",
+      "acceptance": "node --test test/compile.test.js",
+      "wave": 2,
+      "write": 25906,
+      "readFull": 10683,
+      "readWired": 6276.2625,
+      "brief": 4208,
+      "wired": 74377.03,
+      "unwiredLo": 210634.84999999998,
+      "unwiredHi": 304621.05,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 2,
+      "sessionsUnwiredHi": 2
+    },
+    {
+      "id": "L05",
+      "title": "route: units to lanes and waves, conflicts as affinity",
+      "writes": "src/route",
+      "reads": [
+        "src/compile/compiler.js",
+        "src/core/config.js"
+      ],
+      "owes": "a split that respects directory locality, because locality is what a cache prefix is made of",
+      "acceptance": "node --test test/route.test.js",
+      "wave": 2,
+      "write": 6296,
+      "readFull": 9717,
+      "readWired": 5708.7375,
+      "brief": 4141,
+      "wired": 53337.97,
+      "unwiredLo": 144406.45,
+      "unwiredHi": 282692.64999999997,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 1,
+      "sessionsUnwiredHi": 2
+    },
+    {
+      "id": "L06",
+      "title": "run: lanes on the chosen agent, env allowlist, acceptance as the verdict",
+      "writes": "src/run",
+      "reads": [
+        "src/route/index.js",
+        "src/adapters/index.js",
+        "src/core/exec.js"
+      ],
+      "owes": "the prompt and the command are written to disk before anything is spawned; unproven blocks --pr",
+      "acceptance": "node --test test/adapters.test.js",
+      "wave": 2,
+      "write": 11125,
+      "readFull": 5364,
+      "readWired": 3151.35,
+      "brief": 4180,
+      "wired": 52068.24,
+      "unwiredLo": 138788.25,
+      "unwiredHi": 277074.44999999995,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 1,
+      "sessionsUnwiredHi": 2
+    },
+    {
+      "id": "L07",
+      "title": "tokens: estimate, calibrate, probe, price, and the session bill",
+      "writes": "src/tokens",
+      "reads": [
+        "src/adapters/index.js",
+        "src/core/config.js",
+        "src/tokens/prices.js"
+      ],
+      "owes": "measured and estimated are never added and never printed the same way",
+      "acceptance": "node --test test/ledger.test.js",
+      "wave": 3,
+      "write": 29425,
+      "readFull": 7099,
+      "readWired": 4170.6625,
+      "brief": 4173,
+      "wired": 72807.59,
+      "unwiredLo": 205552.25,
+      "unwiredHi": 299538.44999999995,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 2,
+      "sessionsUnwiredHi": 2
+    },
+    {
+      "id": "L08",
+      "title": "designlabs: the doctrine, the declared system and the gate that holds it",
+      "writes": "src/designlabs",
+      "reads": [
+        "src/detectors/_shared.js",
+        "src/kit/registry.js",
+        "src/kit/runner.js",
+        "src/core/config.js"
+      ],
+      "owes": "a rule a browser alone can settle reports unknown, never pass",
+      "acceptance": "node --test test/designlabs.test.js",
+      "wave": 3,
+      "write": 31037,
+      "readFull": 12650,
+      "readWired": 7431.875,
+      "brief": 4209,
+      "wired": 82282.5,
+      "unwiredLo": 220486.65,
+      "unwiredHi": 314472.85,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 2,
+      "sessionsUnwiredHi": 2
+    },
+    {
+      "id": "L09",
+      "title": "wire: the instruction block, the MCP entry and the hooks, per agent",
+      "writes": "src/wire",
+      "reads": [
+        "src/adapters/index.js",
+        "src/core/fs.js"
+      ],
+      "owes": "unwire removes only its own blocks, byte for byte",
+      "acceptance": "node --test test/adapters.test.js",
+      "wave": 3,
+      "write": 13430,
+      "readFull": 5239,
+      "readWired": 3077.9125,
+      "brief": 4136,
+      "wired": 54152.99,
+      "unwiredLo": 140793.25,
+      "unwiredHi": 279079.44999999995,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 1,
+      "sessionsUnwiredHi": 2
+    },
+    {
+      "id": "L10",
+      "title": "the CLI: one entrypoint, every verb, a broken module is a row not a crash",
+      "writes": "src/cli.js",
+      "reads": [
+        "CONVENTIONS.md",
+        "src/core/args.js",
+        "src/core/log.js"
+      ],
+      "owes": "every verb is a dry run until --apply; only run and bridge send can spend",
+      "acceptance": "npm run lint && npm test",
+      "wave": 1,
+      "write": 3222,
+      "readFull": 3098,
+      "readWired": 1820.075,
+      "brief": 4176,
+      "wired": 40966.18,
+      "unwiredLo": 125446.84999999999,
+      "unwiredHi": 263733.05,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 1,
+      "sessionsUnwiredHi": 2
+    }
+  ],
+  "total": {
+    "wired": 634483.35,
+    "lo": 1705444.5,
+    "hi": 2911106.5,
+    "write": 187304,
+    "readFull": 80435,
+    "brief": 41766,
+    "sessionsWired": 10,
+    "sessionsUnwiredLo": 14,
+    "sessionsUnwiredHi": 21
+  }
+}

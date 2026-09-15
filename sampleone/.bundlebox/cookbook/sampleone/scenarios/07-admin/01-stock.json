@@ -1,0 +1,80 @@
+{
+  "id": "admin-stock-is-whole-units",
+  "surface": "admin",
+  "severity": "medium",
+  "title": "stock is a whole number of units, zero or more",
+  "question": "can the operator write a stock level the rest of the service cannot reason about?",
+  "rule": [
+    "catalog.setStock truncates and refuses anything not a finite integer >= 0 \u2014 src/catalog.js"
+  ],
+  "steps": [
+    {
+      "name": "the operator reads the shelf",
+      "do": "GET /admin/stock",
+      "as": "ops",
+      "expect": {
+        "status": 200,
+        "json_len_at_least": {
+          "items": 10
+        }
+      }
+    },
+    {
+      "name": "a negative level is refused",
+      "do": "POST /admin/stock/p6",
+      "as": "ops",
+      "body": {
+        "stock": -1
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "name": "a fraction is refused",
+      "do": "POST /admin/stock/p6",
+      "as": "ops",
+      "body": {
+        "stock": 2.5
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "name": "an unknown product is a 404",
+      "do": "POST /admin/stock/p999",
+      "as": "ops",
+      "body": {
+        "stock": 5
+      },
+      "expect": {
+        "status": 404
+      }
+    },
+    {
+      "name": "the out-of-stock hub can be restocked",
+      "do": "POST /admin/stock/p6",
+      "as": "ops",
+      "body": {
+        "stock": 7
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 7
+        }
+      }
+    },
+    {
+      "name": "and a customer sees it",
+      "do": "GET /products/p6",
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 7
+        }
+      }
+    }
+  ]
+}

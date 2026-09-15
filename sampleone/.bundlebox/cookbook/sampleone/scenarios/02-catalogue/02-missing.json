@@ -1,0 +1,22 @@
+{
+  "id": "catalogue-unknown-product-is-404",
+  "surface": "catalogue",
+  "severity": "low",
+  "title": "an unknown product is a 404 with a reason",
+  "question": "does a bad id fail as a 404 rather than as a 500?",
+  "rule": [
+    "getProduct returns problem(404, 'no such product') \u2014 src/server.js"
+  ],
+  "steps": [
+    {
+      "name": "no such product",
+      "do": "GET /products/p999",
+      "expect": {
+        "status": 404,
+        "json": {
+          "error": "no such product"
+        }
+      }
+    }
+  ]
+}

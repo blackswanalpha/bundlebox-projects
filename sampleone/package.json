@@ -1,0 +1,13 @@
+{
+  "name": "sampleone",
+  "version": "1.0.0",
+  "private": true,
+  "description": "An ecommerce platform that exists to measure bundlebox: catalogue, cart, checkout, orders and admin, with no dependencies.",
+  "type": "module",
+  "engines": { "node": ">=20.0.0" },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js",
+    "seed": "node -e \"import('./src/store.js').then(async s=>{const {seed}=await import('./src/seed.js');s.reset(seed());console.log('seeded')})\""
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "story": "service",
+  "measured_against": "demo",
+  "terms": {
+    "overhead_lean": {
+      "v": 29200,
+      "src": "MEASURED on the bundlebox reference workspace (README: opening window under the lean flag stack)"
+    },
+    "overhead_full": {
+      "v": 44300,
+      "src": "MEASURED on the same workspace with no flag stack"
+    },
+    "churn": {
+      "v": 2.4,
+      "src": "config budget.churn_factor, refit by `bb tokens calibrate`"
+    },
+    "widen": {
+      "v": 0.45,
+      "src": "config budget.anchor_widen: the fraction of the rest of an anchored file a unit is budgeted to also read"
+    },
+    "window": {
+      "v": 160000,
+      "src": "config budget.max_tokens"
+    },
+    "region": {
+      "v": 0.25,
+      "src": "ASSUMED: the share of a neighbour module that is actually the contract. Lower it and the wired total falls."
+    },
+    "survey": {
+      "lo": 0.15,
+      "hi": 0.35,
+      "src": "ASSUMED range: the share of the reference tree a session opens to find what a packed brief would have handed it. This term is the whole thesis — an agent is billed for what it reads, and most of what it reads is orientation, not judgement."
+    }
+  },
+  "lanes": [
+    {
+      "id": "L01",
+      "wave": 1,
+      "title": "the store: durability behind one map",
+      "writes": "src/store.js",
+      "reads": [
+        "README.md"
+      ],
+      "owes": "a read never touches the disk and a write always does; no file yet is a first run, not an error",
+      "acceptance": "npm test",
+      "write": 527,
+      "readFull": 181,
+      "readWired": 106.3375,
+      "brief": 4079,
+      "wired": 34061.21,
+      "unwiredLo": 45710.8,
+      "unwiredHi": 46310,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 1,
+      "sessionsUnwiredHi": 1
+    },
+    {
+      "id": "L02",
+      "wave": 1,
+      "title": "items: what an item is, and the only place that decides",
+      "writes": "src/items.js",
+      "reads": [
+        "src/store.js"
+      ],
+      "owes": "one entry into validation, a wire shape projected through FIELDS so a store field never leaks, and a refusal that names its field",
+      "acceptance": "npm test",
+      "write": 669,
+      "readFull": 527,
+      "readWired": 309.6125,
+      "brief": 4089,
+      "wired": 34701.07,
+      "unwiredLo": 46683.2,
+      "unwiredHi": 47282.4,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 1,
+      "sessionsUnwiredHi": 1
+    },
+    {
+      "id": "L03",
+      "wave": 2,
+      "title": "the wire: routes in one table, handlers that return rather than write",
+      "writes": "src/server.js",
+      "reads": [
+        "src/items.js",
+        "src/log.js"
+      ],
+      "owes": "the route table and the router cannot disagree; 404 on a missing id for read, update and delete alike",
+      "acceptance": "npm test",
+      "write": 1572,
+      "readFull": 897,
+      "readWired": 526.9875000000001,
+      "brief": 4124,
+      "wired": 36160.77,
+      "unwiredLo": 48474.2,
+      "unwiredHi": 49073.4,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 1,
+      "sessionsUnwiredHi": 1
+    },
+    {
+      "id": "L04",
+      "wave": 2,
+      "title": "the corpus: what the running system does, not what the files say",
+      "writes": "test/server.test.js",
+      "reads": [
+        "src/server.js"
+      ],
+      "owes": "the happy path, every refusal, and the lifecycle through to a 404 after delete",
+      "acceptance": "npm run lint && npm test",
+      "write": 1100,
+      "readFull": 1572,
+      "readWired": 923.5500000000001,
+      "brief": 4093,
+      "wired": 36609.52,
+      "unwiredLo": 49622.2,
+      "unwiredHi": 50221.4,
+      "sessionsWired": 1,
+      "sessionsUnwiredLo": 1,
+      "sessionsUnwiredHi": 1
+    }
+  ],
+  "total": {
+    "wired": 141532.56999999998,
+    "lo": 190490.40000000002,
+    "hi": 192887.19999999998,
+    "write": 3868,
+    "readFull": 3177,
+    "brief": 16385,
+    "sessionsWired": 4,
+    "sessionsUnwiredLo": 4,
+    "sessionsUnwiredHi": 4
+  }
+}

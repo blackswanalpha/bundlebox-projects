@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>sampleOne — what the last run measured</title>
+<style>
+:root{--ink:#16181d;--soft:#5a6068;--faint:#8b929b;--rule:#e3e4e1;--bg:#fbfbfa;--panel:#fff;
+ --green:#1f5c4a;--green-soft:#e7f1ed;--red:#a8302a;--red-soft:#fbeceb;--amber:#8a6512;--amber-soft:#fbf3e2;}
+@media (prefers-color-scheme:dark){:root{--ink:#eceef0;--soft:#a2a8b2;--faint:#7c838d;--rule:#2b2f35;
+ --bg:#15171a;--panel:#1d2024;--green:#52b394;--green-soft:#17332a;--red:#e58b84;--red-soft:#32201f;
+ --amber:#e8c07c;--amber-soft:#31281a;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+ font:15px/1.55 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1060px;margin:0 auto;padding:34px 21px 68px}
+h1{font-size:25px;margin:0 0 4px;letter-spacing:-.015em}
+.sub{color:var(--soft);margin:0 0 34px}
+h2{font-size:15px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);
+ margin:34px 0 13px;font-weight:600}
+.cards{display:grid;gap:13px;grid-template-columns:repeat(auto-fit,minmax(178px,1fr))}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:16px}
+.card .k{color:var(--soft);font-size:13px;margin:0 0 6px}
+.card .v{font-size:27px;font-weight:650;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.card .w{color:var(--faint);font-size:12.5px;margin:5px 0 0}
+.ok .v{color:var(--green)} .bad .v{color:var(--red)}
+table{width:100%;border-collapse:collapse;background:var(--panel);
+ border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--rule);font-size:14px}
+th{color:var(--faint);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+tr:last-child td{border-bottom:0}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:12px;font-weight:600}
+.pill.g{background:var(--green-soft);color:var(--green)}
+.pill.r{background:var(--red-soft);color:var(--red)}
+.pill.a{background:var(--amber-soft);color:var(--amber)}
+code{font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--green-soft);
+ color:var(--green);padding:1px 5px;border-radius:4px}
+.note{color:var(--soft);font-size:14px;margin:13px 0 0}
+footer{margin-top:55px;padding-top:21px;border-top:1px solid var(--rule);color:var(--faint);font-size:13px}
+a{color:var(--green)}
+@media(max-width:560px){.wrap{padding:21px 16px 55px}h1{font-size:21px}.card .v{font-size:23px}}
+</style></head><body><div class="wrap">
+
+<h1>sampleOne</h1>
+<p class="sub">What the last run measured. Every number below was read out of a JSON artefact
+bundlebox wrote — nothing on this page is typed by hand.<br>
+Built 2026-09-15T09:12:27.112Z by <code>node scripts/monitor.mjs</code>.</p>
+
+<h2>The corpus, against a live service</h2>
+<div class="cards">
+  <div class="card ok"><p class="k">steps</p>
+    <p class="v">76 / 76</p>
+    <p class="w">every surface at 100%</p></div>
+  <div class="card"><p class="k">scenarios</p><p class="v">14</p>
+    <p class="w">across 7 surfaces</p></div>
+  <div class="card"><p class="k">wall clock</p><p class="v">8s</p>
+    <p class="w">81 requests, kernel engine</p></div>
+  <div class="card ok"><p class="k">model tokens</p><p class="v">0</p>
+    <p class="w">the corpus never calls one</p></div>
+</div>
+
+<h2>By surface</h2>
+<table><thead><tr><th>surface</th><th class="num">passed</th><th class="num">red</th><th class="num">score</th></tr></thead>
+<tbody><tr><td>health</td><td class="num">1</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>catalogue</td><td class="num">5</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>auth</td><td class="num">5</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>cart</td><td class="num">18</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>checkout</td><td class="num">16</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>orders</td><td class="num">25</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>admin</td><td class="num">6</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr></tbody></table>
+
+<h2>The log, as signatures</h2>
+<div class="cards">
+  <div class="card"><p class="k">lines written</p><p class="v">496</p>
+    <p class="w">27,934 bytes on disk</p></div>
+  <div class="card ok"><p class="k">rows to read</p>
+    <p class="v">29</p>
+    <p class="w">distinct signatures</p></div>
+  <div class="card ok"><p class="k">tokens spared</p>
+    <p class="v">93%</p>
+    <p class="w">8,495 raw &rarr; 637 digested</p></div>
+  <div class="card"><p class="k">named failures</p><p class="v">2</p>
+    <p class="w">none high</p></div>
+</div>
+<table><thead><tr><th>bucket</th><th>what it means</th><th class="num">n</th></tr></thead>
+<tbody><tr><td><span class="pill a">medium</span> auth-refused</td><td class="num">A request was refused for identity. Expected in the auth scenarios; unexpected elsewhere means a token expired mid-run.</td><td class="num">24</td></tr><tr><td><span class="pill g">low</span> card-declined</td><td class="num">A payment was declined. Expected for a card ending 0000; the stock release path runs on this.</td><td class="num">6</td></tr></tbody></table>
+
+<h2>Top signatures</h2>
+<table><thead><tr><th>signature</th><th class="num">n</th></tr></thead><tbody><tr><td><code>INFO POST /cart/lines # #ms</code></td><td class="num">72</td></tr><tr><td><code>WARN POST P # #ms</code></td><td class="num">48</td></tr><tr><td><code>WARN POST /checkout # #ms</code></td><td class="num">36</td></tr><tr><td><code>INFO PATCH P # #ms</code></td><td class="num">30</td></tr><tr><td><code>INFO GET /products # #ms</code></td><td class="num">24</td></tr><tr><td><code>INFO GET /products/p8 # #ms</code></td><td class="num">24</td></tr><tr><td><code>INFO POST /auth/token # #ms</code></td><td class="num">24</td></tr><tr><td><code>INFO POST /checkout # #ms</code></td><td class="num">24</td></tr><tr><td><code>INFO POST P # #ms</code></td><td class="num">24</td></tr><tr><td><code>WARN POST /cart/lines # #ms</code></td><td class="num">24</td></tr><tr><td><code>INFO GET /health # #ms</code></td><td class="num">21</td></tr><tr><td><code>INFO GET /products/p7 # #ms</code></td><td class="num">18</td></tr></tbody></table>
+<p class="note">Every digit, uuid, hash and path erased, so 496 lines
+collapse to the shapes they actually are. The raw file is still on disk.</p>
+
+<h2>The source, before anything ran</h2>
+<div class="cards">
+  <div class="card"><p class="k">source</p><p class="v">19.1k</p>
+    <p class="w">tokens over 13 files</p></div>
+  <div class="card"><p class="k">findings</p><p class="v">9</p>
+    <p class="w">with file and line evidence</p></div>
+  <div class="card ok"><p class="k">scan cost</p><p class="v">0</p><p class="w">model tokens</p></div>
+  <div class="card"><p class="k">unit tests</p><p class="v">12</p><p class="w"><code>npm test</code></p></div>
+</div>
+<table><thead><tr><th>detector</th><th>finding</th><th class="num">severity</th></tr></thead>
+<tbody><tr><td>dead-exports</td><td class="num">src/auth.js: 2 export(s) referenced by no other file</td><td class="num"><span class="pill g">low</span></td></tr><tr><td>dead-exports</td><td class="num">src/cart.js: 4 export(s) referenced by no other file</td><td class="num"><span class="pill g">low</span></td></tr><tr><td>dead-exports</td><td class="num">src/catalog.js: 2 export(s) referenced by no other file</td><td class="num"><span class="pill g">low</span></td></tr><tr><td>dead-exports</td><td class="num">src/money.js: 5 export(s) referenced by no other file</td><td class="num"><span class="pill g">low</span></td></tr><tr><td>dead-exports</td><td class="num">src/orders.js: 4 export(s) referenced by no other file</td><td class="num"><span class="pill g">low</span></td></tr><tr><td>dead-exports</td><td class="num">src/seed.js: 1 export(s) referenced by no other file</td><td class="num"><span class="pill g">low</span></td></tr><tr><td>dead-exports</td><td class="num">src/server.js: 3 export(s) referenced by no other file</td><td class="num"><span class="pill g">low</span></td></tr><tr><td>dead-exports</td><td class="num">src/store.js: 2 export(s) referenced by no other file</td><td class="num"><span class="pill g">low</span></td></tr><tr><td>anti-slop</td><td class="num">web/app.js: 1 anti-slop hit(s) — 1 conditional-empty-spread</td><td class="num"><span class="pill g">info</span></td></tr></tbody></table>
+
+<h2>What has already been driven</h2>
+<table><thead><tr><th>verdict</th><th>record</th><th class="num">stands in for</th></tr></thead>
+<tbody><tr><td><span class="pill g">fresh</span></td><td class="num">The 14-scenario corpus runs green against a live sampleOne</td><td class="num">10 min · ~24k tokens</td></tr></tbody></table>
+<p class="note">A record declares the facts its result rests on, and those are re-probed on every read.
+<code>fresh</code> means drive nothing; <code>stale</code> names the fact that moved and both values.</p>
+
+<h2>Services</h2>
+<table><thead><tr><th>service</th><th>process</th><th>answering</th><th class="num">latency</th><th class="num">memory</th></tr></thead>
+<tbody><tr><td>sampleone</td><td class="num"><span class="pill g">up</span></td><td class="num"><span class="pill g">up</span></td><td class="num">0.6ms</td><td class="num">19M</td></tr></tbody></table>
+
+<footer>
+sampleOne is an ecommerce platform that exists to measure bundlebox.
+Rebuild this page with <code>node scripts/monitor.mjs</code>.
+</footer>
+</div></body></html>

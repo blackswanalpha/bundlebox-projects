@@ -1,0 +1,92 @@
+{
+ "id": "tl-lifecycle",
+ "surface": "tasks",
+ "severity": "high",
+ "title": "a task through its whole life",
+ "question": "does a create round-trip, does a write increment the version, and is the delete final?",
+ "rule": [
+  "POST /tasks returns 201 with version 1 and an id of the shape tk-<n>.",
+  "PATCH increments version on every accepted write \u2014 a 200 that stored nothing is identical from outside without it.",
+  "DELETE returns 204, and a second DELETE is 404."
+ ],
+ "steps": [
+  {
+   "name": "create",
+   "do": "POST /tasks",
+   "body": {
+    "title": "audit {{run}}"
+   },
+   "expect": {
+    "status": 201,
+    "json": {
+     "version": 1,
+     "state": "open"
+    },
+    "json_matches": {
+     "id": "^tk-[0-9]+$"
+    }
+   },
+   "save": {
+    "task": "id"
+   }
+  },
+  {
+   "name": "read it back \u2014 a 201 that stored nothing looks identical from here",
+   "do": "GET /tasks/{{task}}",
+   "expect": {
+    "status": 200,
+    "json": {
+     "id": "{{task}}",
+     "title": "audit {{run}}"
+    },
+    "max_ms": 500
+   }
+  },
+  {
+   "name": "it is in the list",
+   "do": "GET /tasks",
+   "expect": {
+    "json_len_at_least": {
+     "_list": 1
+    },
+    "contains": {
+     "_list": {
+      "id": "{{task}}"
+     }
+    }
+   }
+  },
+  {
+   "name": "a write moves the version",
+   "do": "PATCH /tasks/{{task}}",
+   "body": {
+    "state": "doing"
+   },
+   "expect": {
+    "status": 200,
+    "json": {
+     "state": "doing",
+     "version": 2
+    }
+   }
+  },
+  {
+   "name": "delete",
+   "do": "DELETE /tasks/{{task}}",
+   "expect": {
+    "status": 204
+   }
+  },
+  {
+   "name": "and it is gone, by name",
+   "do": "GET /tasks/{{task}}",
+   "expect": {
+    "status": 404,
+    "json": {
+     "error": "no such task",
+     "id": "{{task}}"
+    }
+   }
+  }
+ ]
+}

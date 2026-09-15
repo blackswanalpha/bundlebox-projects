@@ -1,0 +1,74 @@
+{
+ "id": "tl-refusals",
+ "surface": "refusals",
+ "severity": "high",
+ "title": "every refusal names the field and what was allowed",
+ "question": "can a caller fix the request from the response alone?",
+ "rule": [
+  "A 400 carries `fields`, each with the field name and the error.",
+  "An unknown state is refused with the allowed set and the value that was sent.",
+  "A wrong method on a known path is 405 with the allowed methods, not 404."
+ ],
+ "steps": [
+  {
+   "name": "a missing title says which field",
+   "do": "POST /tasks",
+   "body": {
+    "title": "  "
+   },
+   "expect": {
+    "status": 400,
+    "json": {
+     "error": "invalid task"
+    },
+    "contains": {
+     "fields": {
+      "field": "title",
+      "error": "required"
+     }
+    }
+   }
+  },
+  {
+   "name": "an unknown state says what was allowed",
+   "do": "POST /tasks",
+   "body": {
+    "title": "ok",
+    "state": "pendign"
+   },
+   "expect": {
+    "status": 400,
+    "contains": {
+     "fields": {
+      "field": "state",
+      "got": "pendign"
+     }
+    }
+   }
+  },
+  {
+   "name": "an undeclared route is a 404 that names the path",
+   "do": "GET /nope",
+   "expect": {
+    "status": 404,
+    "json": {
+     "error": "no such route",
+     "path": "/nope"
+    }
+   }
+  },
+  {
+   "name": "a wrong method is a 405 that names the right one",
+   "do": "DELETE /health",
+   "expect": {
+    "status": 405,
+    "json": {
+     "error": "method not allowed"
+    },
+    "json_present": [
+     "allowed"
+    ]
+   }
+  }
+ ]
+}

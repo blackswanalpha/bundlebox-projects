@@ -1,0 +1,111 @@
+{
+  "id": "orders-cancel-restocks-exactly-once",
+  "surface": "orders",
+  "severity": "high",
+  "title": "cancelling restocks once, and the second cancel changes nothing",
+  "question": "does a double cancel invent inventory?",
+  "rule": [
+    "cancel returns 409 when state is already cancelled, before any restock \u2014 src/orders.js",
+    "PRD rule 13."
+  ],
+  "steps": [
+    {
+      "name": "the pad has forty-two",
+      "do": "GET /products/p8",
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 42
+        }
+      }
+    },
+    {
+      "name": "Ada buys two",
+      "do": "POST /cart/lines",
+      "as": "ada",
+      "body": {
+        "product_id": "p8",
+        "qty": 2
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "and checks out",
+      "do": "POST /checkout",
+      "as": "ada",
+      "body": {
+        "address": {
+          "name": "Ada",
+          "line1": "1 Main",
+          "city": "Nairobi",
+          "postcode": "00100",
+          "country": "KE"
+        },
+        "payment": {
+          "method": "card",
+          "last4": "4242"
+        }
+      },
+      "expect": {
+        "status": 201
+      },
+      "save": {
+        "oid": "id"
+      }
+    },
+    {
+      "name": "forty are left",
+      "do": "GET /products/p8",
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 40
+        }
+      }
+    },
+    {
+      "name": "she cancels",
+      "do": "POST /orders/{{oid}}/cancel",
+      "as": "ada",
+      "expect": {
+        "status": 200,
+        "json": {
+          "state": "cancelled"
+        }
+      }
+    },
+    {
+      "name": "forty-two again",
+      "do": "GET /products/p8",
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 42
+        }
+      }
+    },
+    {
+      "name": "cancelling again is refused",
+      "do": "POST /orders/{{oid}}/cancel",
+      "as": "ada",
+      "expect": {
+        "status": 409,
+        "json": {
+          "error": "already cancelled"
+        }
+      }
+    },
+    {
+      "name": "and the shelf is still forty-two, not forty-four",
+      "do": "GET /products/p8",
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 42
+        }
+      }
+    }
+  ]
+}

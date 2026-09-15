@@ -1,0 +1,7 @@
+node_modules/
+var/
+*.log
+
+# bundlebox: derived state, rebuilt by bb scan / bb snapgen / bb cookbook run
+.bundlebox/var/
+.bundlebox/out/

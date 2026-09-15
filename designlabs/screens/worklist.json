@@ -1,0 +1,100 @@
+{
+  "id": "worklist",
+  "area": "home",
+  "title": "Worklist",
+  "lede": "Everything that needs a decision today, ranked, with the reason it is here.",
+  "primary": "resolve",
+  "secondary": [
+    "filter",
+    "snooze",
+    "open-source"
+  ],
+  "disclosure_depth": 1,
+  "accents": 1,
+  "states": {
+    "rest": {
+      "label": "Rest",
+      "note": "Five rows, ranked. The top row is the only accented element."
+    },
+    "loading": {
+      "label": "Loading",
+      "skeleton": true,
+      "note": "Five row-shaped skeletons, so the page does not resize when data lands."
+    },
+    "empty": {
+      "label": "Empty",
+      "variant": "first-run",
+      "note": "Nothing to decide before 2pm. Says what will bring rows here, not just that there are none."
+    },
+    "error": {
+      "label": "Error",
+      "copy": "Couldn't reach the calendar. Retry, or work from what was cached at 06:12."
+    },
+    "partial": {
+      "label": "Partial",
+      "note": "Mail arrived, calendar did not. The missing source is named in the header, not hidden."
+    },
+    "offline": {
+      "label": "Offline",
+      "note": "Cached rows stay readable and every action that needs the network is disabled with a reason."
+    }
+  },
+  "groups": [
+    {
+      "name": "row",
+      "inner": 8,
+      "outer": 20,
+      "items": 5
+    },
+    {
+      "name": "section",
+      "inner": 20,
+      "outer": 52,
+      "items": 3
+    }
+  ],
+  "destructive": [
+    {
+      "action": "dismiss",
+      "undo": true,
+      "note": "Undo for 8s in the same row; no dialog."
+    }
+  ],
+  "audit": {
+    "budget": 16,
+    "elements": 13,
+    "absorbs": "ranking five heterogeneous sources into one order, and explaining the rank in one clause per row",
+    "transfers": "the user still picks which row to act on; the product does not act unasked",
+    "claim": "median time from open to first action, measured, not the number of taps"
+  },
+  "flow": [
+    {
+      "node": "open",
+      "to": [
+        "read"
+      ]
+    },
+    {
+      "node": "read",
+      "to": [
+        "resolve",
+        "snooze"
+      ]
+    },
+    {
+      "node": "resolve",
+      "terminal": true,
+      "residue": "the row leaves and the count drops"
+    },
+    {
+      "node": "snooze",
+      "terminal": true,
+      "residue": "the row returns at the named time, not vaguely later"
+    },
+    {
+      "node": "source-unreachable",
+      "failure": true,
+      "residue": "cached rows remain, the header names what is missing"
+    }
+  ]
+}

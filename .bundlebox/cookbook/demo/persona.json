@@ -1,0 +1,21 @@
+{
+  "title": "demo",
+  "who": "who is being simulated, and why that shape stresses what matters",
+  "base": "http://127.0.0.1:4411",
+  "timezone": "UTC",
+  "tz_offset_minutes": 0,
+  "rpm": 55,
+  "parallel": 1,
+  "headers": {},
+  "vars": {},
+  "actors": {},
+  "setup": [
+    {
+      "name": "the service answers before anything claims to have tested it",
+      "do": "GET /health",
+      "expect": {
+        "status": 200
+      }
+    }
+  ]
+}

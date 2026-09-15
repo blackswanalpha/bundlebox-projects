@@ -1,0 +1,72 @@
+{
+  "id": "auth-role-comes-from-the-address",
+  "surface": "auth",
+  "severity": "high",
+  "title": "admin is a role on the token, never a header",
+  "question": "can a customer reach an admin route by asking nicely?",
+  "rule": [
+    "Only an address ending @sampleone.test is issued role=admin \u2014 src/server.js:token()",
+    "PRD rule 14. A header-granted role is a role anybody can grant themselves."
+  ],
+  "steps": [
+    {
+      "name": "a plain address gets a customer",
+      "do": "POST /auth/token",
+      "body": {
+        "email": "someone@example.com"
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "role": "customer"
+        }
+      },
+      "save": {
+        "plain": "token"
+      }
+    },
+    {
+      "name": "an unparseable address is refused",
+      "do": "POST /auth/token",
+      "body": {
+        "email": "not-an-address"
+      },
+      "expect": {
+        "status": 422
+      }
+    },
+    {
+      "name": "no token at all is a 401, not a 403",
+      "do": "GET /cart",
+      "expect": {
+        "status": 401,
+        "json": {
+          "error": "a bearer token is required"
+        }
+      }
+    },
+    {
+      "name": "a customer token cannot read stock",
+      "do": "GET /admin/stock",
+      "headers": {
+        "authorization": "Bearer {{plain}}"
+      },
+      "expect": {
+        "status": 403,
+        "json": {
+          "error": "admin only"
+        }
+      }
+    },
+    {
+      "name": "a forged token is refused",
+      "do": "GET /admin/stock",
+      "headers": {
+        "authorization": "Bearer QzAuYWRtaW4.not-a-real-mac"
+      },
+      "expect": {
+        "status": 401
+      }
+    }
+  ]
+}

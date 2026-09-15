@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>state contract self-test</title>
+<link rel="stylesheet" href="../styles/tokens.css">
+<style>
+  body { padding: 20px; font-family: var(--font-text); }
+  #RESULT { white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 13px;
+            border: 1px solid var(--edge); border-radius: var(--r-control); padding: 12px; }
+  .stage { border: 1px solid var(--hair); border-radius: var(--r-surface); padding: 20px; margin-bottom: 12px; }
+  .skeleton { height: 20px; border-radius: var(--r-control); background: var(--hair); margin-bottom: 4px; }
+  .state-badge { font-size: var(--f-micro); letter-spacing: .08em; color: var(--dim); }
+</style>
+</head>
+<body>
+<h1>State contract self-test</h1>
+<p>Serve this over <code>http://</code>, not <code>file://</code>. It renders every DECLARED
+state of every screen and asserts each one draws something a parse cannot see: a cell
+identical to <code>rest</code> is the studio claiming a state it does not actually draw.</p>
+<div id="stage" class="stage"></div>
+<pre id="RESULT">running…</pre>
+<script>
+/* The 22 properties that carry a state. Read over the whole SUBTREE, because
+   most components apply a state to their parts and not to their root. */
+function fingerprint(root) {
+  const parts = [];
+  for (const el of [root, ...root.querySelectorAll('*')]) {
+    const cs = getComputedStyle(el), af = getComputedStyle(el, '::after'), bf = getComputedStyle(el, '::before');
+    parts.push([cs.backgroundColor, cs.backgroundImage, cs.outlineWidth, cs.outlineColor, cs.transform,
+      cs.opacity, cs.borderLeftWidth, cs.borderColor, cs.boxShadow, cs.filter, cs.color, cs.pointerEvents,
+      cs.fontWeight, cs.visibility, cs.animationName, cs.textDecorationLine, af.backgroundColor, af.content,
+      af.animationName, bf.animationName, bf.content, bf.borderTopColor].join('|'));
+  }
+  return parts.join('\n');
+}
+
+function draw(screen, name, host) {
+  const st = screen.states[name] || {};
+  host.replaceChildren();
+  host.dataset.state = name;
+  const badge = document.createElement('div');
+  badge.className = 'state-badge';
+  badge.textContent = name.toUpperCase();
+  const body = document.createElement('p');
+  body.textContent = st.copy || st.note || '';
+  host.append(badge, body);
+  if (st.skeleton) for (let i = 0; i < 5; i++) {
+    const s = document.createElement('div'); s.className = 'skeleton'; host.append(s);
+  }
+}
+
+(async () => {
+  const out = [], fail = [];
+  const list = await (await fetch('../screens/index.json')).json();
+  const screens = await Promise.all(list.map(async (n) => (await fetch('../screens/' + n)).json()));
+  const host = document.getElementById('stage');
+  for (const s of screens) {
+    const names = Object.keys(s.states || {});
+    if (!names.includes('rest')) { fail.push(s.id + ': no rest state to compare against'); continue; }
+    draw(s, 'rest', host);
+    const rest = fingerprint(host);
+    for (const n of names) {
+      if (n === 'rest') continue;
+      draw(s, n, host);
+      const same = fingerprint(host) === rest;
+      (same ? fail : out).push(s.id + '/' + n + (same ? ': renders identically to rest' : ': distinct'));
+    }
+  }
+  document.getElementById('RESULT').textContent =
+    out.map((l) => '  ok    ' + l).join('\n') + (out.length && fail.length ? '\n' : '') +
+    fail.map((l) => '  FAIL  ' + l).join('\n') +
+    '\n\n' + out.length + ' distinct, ' + fail.length + ' indistinguishable.' +
+    (fail.length ? '' : ' Every declared state draws something.');
+})().catch((e) => { document.getElementById('RESULT').textContent = 'could not run: ' + e.message; });
+</script>
+</body>
+</html>

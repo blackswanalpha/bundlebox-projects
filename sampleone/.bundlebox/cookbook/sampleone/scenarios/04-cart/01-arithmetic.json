@@ -1,0 +1,117 @@
+{
+  "id": "cart-receipt-arithmetic",
+  "surface": "cart",
+  "severity": "high",
+  "title": "the receipt adds up, in integer cents",
+  "question": "does subtotal + shipping + tax equal the total the customer is charged?",
+  "rule": [
+    "money.totals: tax on (subtotal - discount + shipping), in basis points, once \u2014 src/money.js",
+    "Shipping is 599 and free at or above 7500 \u2014 src/cart.js",
+    "PRD rules 1 and 5."
+  ],
+  "steps": [
+    {
+      "name": "start from an empty cart",
+      "do": "GET /cart",
+      "as": "ada",
+      "expect": {
+        "status": 200,
+        "json": {
+          "subtotal_cents": 0,
+          "shipping_cents": 0,
+          "total_cents": 0
+        }
+      }
+    },
+    {
+      "name": "one cable at 1200",
+      "do": "POST /cart/lines",
+      "as": "ada",
+      "body": {
+        "product_id": "p4",
+        "qty": 1
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "subtotal_cents": 1200,
+          "shipping_cents": 599
+        }
+      }
+    },
+    {
+      "name": "tax is 8.25% of subtotal plus shipping, floored half-up: (1200+599)*825/10000 = 148",
+      "do": "GET /cart",
+      "as": "ada",
+      "expect": {
+        "status": 200,
+        "json": {
+          "tax_cents": 148,
+          "total_cents": 1947
+        }
+      }
+    },
+    {
+      "name": "the same product again is one line with a larger quantity",
+      "do": "POST /cart/lines",
+      "as": "ada",
+      "body": {
+        "product_id": "p4",
+        "qty": 4
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "lines.0.qty": 5
+        },
+        "json_len_at_most": {
+          "lines": 1
+        }
+      }
+    },
+    {
+      "name": "at or above 7500 shipping is free",
+      "do": "POST /cart/lines",
+      "as": "ada",
+      "body": {
+        "product_id": "p1",
+        "qty": 1
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "subtotal_cents": 14900,
+          "shipping_cents": 0
+        }
+      }
+    },
+    {
+      "name": "the cable line goes",
+      "do": "PATCH /cart/lines/L1-p4",
+      "as": "ada",
+      "body": {
+        "qty": 0
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "and so does the keyboard, so the next scenario starts from an empty cart rather than from whatever this one left",
+      "do": "PATCH /cart/lines/L2-p1",
+      "as": "ada",
+      "body": {
+        "qty": 0
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "subtotal_cents": 0
+        },
+        "json_len_at_most": {
+          "lines": 0
+        }
+      }
+    }
+  ]
+}

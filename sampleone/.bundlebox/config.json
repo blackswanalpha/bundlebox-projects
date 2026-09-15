@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "workspace": { "name": "sampleone" },
+  "gates": {
+    ".": { "quick": "node --test test/*.test.js", "full": "node --test test/*.test.js" }
+  },
+  "lanes": { "agent": "claude", "model": "sonnet", "max_usd_per_lane": 2, "max_usd_per_day": 10 },
+  "cookbook": { "base": "http://127.0.0.1:8500" }
+}

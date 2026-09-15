@@ -1,0 +1,45 @@
+{
+  "id": "service",
+  "title": "A worklist service and the UI in front of it",
+  "thesis": "One collection, six states, and every refusal says which field it refused — the boring parts done properly are the product.",
+  "falsified_by": "one response shape a client cannot predict from the contract, or one refusal that does not name its field",
+  "unit": "one surface, with its contract, its refusals and a corpus that proves it against a running process",
+  "target_tokens": 120000,
+  "target_note": "A service this size does not need a 350k wave. Declaring the smaller budget is the point: a wave is sized to the work, not to the window.",
+  "reference": {
+    "root": "demo",
+    "scan": "src",
+    "why": "Measured against the service that actually exists in this workspace, not against a guess. `bb tokens estimate demo/src` is the same walk."
+  },
+  "contracts": ["Item", "Invalid", "Route"],
+  "gates": { "quick": "npm test", "full": "npm run lint && npm test" },
+  "surfaces": [
+    { "id": "health", "why": "is it up at all, and does it know how much it holds" },
+    { "id": "items", "why": "the thing the product is about" },
+    { "id": "web", "why": "the only surface a person actually sees" }
+  ],
+  "waves": [
+    { "n": 1, "title": "the contract", "lanes": ["L01", "L02"],
+      "why": "nothing above this can be proven until an item has one definition and one wire shape" },
+    { "n": 2, "title": "the wire and what proves it", "lanes": ["L03", "L04"],
+      "why": "routes, and a corpus that runs against the process rather than the files" }
+  ],
+  "lanes": [
+    { "id": "L01", "wave": 1, "title": "the store: durability behind one map",
+      "writes": "src/store.js", "reads": ["README.md"],
+      "owes": "a read never touches the disk and a write always does; no file yet is a first run, not an error",
+      "acceptance": "npm test" },
+    { "id": "L02", "wave": 1, "title": "items: what an item is, and the only place that decides",
+      "writes": "src/items.js", "reads": ["src/store.js"],
+      "owes": "one entry into validation, a wire shape projected through FIELDS so a store field never leaks, and a refusal that names its field",
+      "acceptance": "npm test" },
+    { "id": "L03", "wave": 2, "title": "the wire: routes in one table, handlers that return rather than write",
+      "writes": "src/server.js", "reads": ["src/items.js", "src/log.js"],
+      "owes": "the route table and the router cannot disagree; 404 on a missing id for read, update and delete alike",
+      "acceptance": "npm test" },
+    { "id": "L04", "wave": 2, "title": "the corpus: what the running system does, not what the files say",
+      "writes": "test/server.test.js", "reads": ["src/server.js"],
+      "owes": "the happy path, every refusal, and the lifecycle through to a 404 after delete",
+      "acceptance": "npm run lint && npm test" }
+  ]
+}

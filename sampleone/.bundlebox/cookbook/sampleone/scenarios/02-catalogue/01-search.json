@@ -1,0 +1,60 @@
+{
+  "id": "catalogue-search-ranks-sku-first",
+  "surface": "catalogue",
+  "severity": "medium",
+  "title": "an exact sku outranks a name match",
+  "question": "does a customer typing a sku get that product first?",
+  "rule": [
+    "catalog.search ranks sku-exact 0, name-prefix 1, everything else 2 \u2014 src/catalog.js",
+    "PRD rule: search is ranked so an exact sku beats a tag match."
+  ],
+  "steps": [
+    {
+      "name": "the whole catalogue is ten products",
+      "do": "GET /products",
+      "expect": {
+        "status": 200,
+        "json": {
+          "total": 10
+        },
+        "json_len_at_least": {
+          "items": 10
+        }
+      }
+    },
+    {
+      "name": "an exact sku comes first",
+      "do": "GET /products?q=DOCK-11",
+      "expect": {
+        "status": 200,
+        "json": {
+          "items.0.sku": "DOCK-11"
+        }
+      }
+    },
+    {
+      "name": "a tag narrows without matching every name",
+      "do": "GET /products?tag=cable",
+      "expect": {
+        "status": 200,
+        "json": {
+          "total": 2
+        }
+      }
+    },
+    {
+      "name": "paging is honoured",
+      "do": "GET /products?size=3&page=2",
+      "expect": {
+        "status": 200,
+        "json": {
+          "page": 2,
+          "size": 3
+        },
+        "json_len_at_most": {
+          "items": 3
+        }
+      }
+    }
+  ]
+}

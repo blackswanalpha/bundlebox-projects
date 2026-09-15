@@ -1,0 +1,120 @@
+{
+  "id": "checkout-last-unit-goes-to-one-order",
+  "surface": "checkout",
+  "severity": "high",
+  "title": "one unit, two carts, one order",
+  "question": "can the same single unit be sold twice?",
+  "rule": [
+    "catalog.reserve checks every line before the first decrement, and takes all or nothing \u2014 src/catalog.js",
+    "PRD rules 7 and 8. A partial reserve leaves an order the customer did not agree to."
+  ],
+  "steps": [
+    {
+      "name": "the dock has exactly one",
+      "do": "GET /products/p5",
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 1
+        }
+      }
+    },
+    {
+      "name": "Ada holds it",
+      "do": "POST /cart/lines",
+      "as": "ada",
+      "body": {
+        "product_id": "p5",
+        "qty": 1
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "so does Bo",
+      "do": "POST /cart/lines",
+      "as": "bo",
+      "body": {
+        "product_id": "p5",
+        "qty": 1
+      },
+      "expect": {
+        "status": 200
+      }
+    },
+    {
+      "name": "Ada's order is accepted",
+      "do": "POST /checkout",
+      "as": "ada",
+      "body": {
+        "address": {
+          "name": "Ada",
+          "line1": "1 Main",
+          "city": "Nairobi",
+          "postcode": "00100",
+          "country": "KE"
+        },
+        "payment": {
+          "method": "card",
+          "last4": "4242"
+        }
+      },
+      "expect": {
+        "status": 201,
+        "json": {
+          "state": "paid"
+        }
+      },
+      "save": {
+        "ada_order": "id"
+      }
+    },
+    {
+      "name": "Bo's is refused with what was wanted and what was there",
+      "do": "POST /checkout",
+      "as": "bo",
+      "body": {
+        "address": {
+          "name": "Bo",
+          "line1": "2 Main",
+          "city": "Nairobi",
+          "postcode": "00100",
+          "country": "KE"
+        },
+        "payment": {
+          "method": "card",
+          "last4": "4242"
+        }
+      },
+      "expect": {
+        "status": 409,
+        "json": {
+          "problems.0.have": 0,
+          "problems.0.want": 1
+        }
+      }
+    },
+    {
+      "name": "and the shelf is at zero, not minus one",
+      "do": "GET /products/p5",
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 0
+        }
+      }
+    },
+    {
+      "name": "Bo's cart is cleared for the next scenario",
+      "do": "PATCH /cart/lines/L1-p5",
+      "as": "bo",
+      "body": {
+        "qty": 0
+      },
+      "expect": {
+        "status": 200
+      }
+    }
+  ]
+}

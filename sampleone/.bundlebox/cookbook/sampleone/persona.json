@@ -1,0 +1,102 @@
+{
+  "title": "sampleOne \u2014 a customer, a second customer, and the operator",
+  "who": "Ada buys, Bo is the second customer who must never see Ada's order, and ops is the only role that can move stock or an order. Two customers is the whole point: a tenancy leak is invisible in a corpus that runs as one.",
+  "base": "http://127.0.0.1:8500",
+  "timezone": "UTC",
+  "tz_offset_minutes": 0,
+  "rpm": 600,
+  "parallel": 1,
+  "timeout_ms": 8000,
+  "headers": {
+    "content-type": "application/json"
+  },
+  "vars": {},
+  "actors": {
+    "ada": {
+      "headers": {
+        "authorization": "Bearer {{ada_token}}"
+      }
+    },
+    "bo": {
+      "headers": {
+        "authorization": "Bearer {{bo_token}}"
+      }
+    },
+    "ops": {
+      "headers": {
+        "authorization": "Bearer {{ops_token}}"
+      }
+    }
+  },
+  "setup": [
+    {
+      "name": "the service answers before anything claims to have tested it",
+      "do": "GET /health",
+      "expect": {
+        "status": 200,
+        "json": {
+          "service": "sampleone"
+        },
+        "max_ms": 2000
+      }
+    },
+    {
+      "name": "the operator gets a token",
+      "do": "POST /auth/token",
+      "body": {
+        "email": "ops@sampleone.test"
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "role": "admin"
+        }
+      },
+      "save": {
+        "ops_token": "token"
+      }
+    },
+    {
+      "name": "the catalogue is back at its seed, so every price below is a fixed number",
+      "do": "POST /admin/reset",
+      "as": "ops",
+      "expect": {
+        "status": 200,
+        "json": {
+          "products": 10
+        }
+      }
+    },
+    {
+      "name": "Ada gets a token",
+      "do": "POST /auth/token",
+      "body": {
+        "email": "ada@example.com"
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "role": "customer"
+        }
+      },
+      "save": {
+        "ada_token": "token",
+        "ada_id": "customer_id"
+      }
+    },
+    {
+      "name": "Bo gets a token",
+      "do": "POST /auth/token",
+      "body": {
+        "email": "bo@example.com"
+      },
+      "expect": {
+        "status": 200
+      },
+      "save": {
+        "bo_token": "token",
+        "bo_id": "customer_id"
+      }
+    }
+  ]
+}
