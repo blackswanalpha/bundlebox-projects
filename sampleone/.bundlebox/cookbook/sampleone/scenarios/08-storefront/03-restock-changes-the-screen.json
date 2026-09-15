@@ -1,0 +1,105 @@
+{
+  "id": "storefront-restock-reaches-the-screen",
+  "surface": "storefront",
+  "severity": "medium",
+  "title": "restocking the empty shelf enables its button, and nothing else moves",
+  "question": "does a write through the admin API reach the page a customer sees?",
+  "rule": [
+    "catalog.setStock writes p.stock; web/app.js reads it on the next load and drops `disabled`.",
+    "`bb dotty during --reload` takes a frame each side of the command and reports the difference",
+    "as a MULTISET, so one button out of ten changing state is visible rather than averaged away.",
+    "The diff names the product because each button carries its own aria-label; without that",
+    "every row would read `Add to cart` and the multiset diff could not say WHICH one moved."
+  ],
+  "steps": [
+    {
+      "name": "a browser is listening, or nothing below this is about the product",
+      "run": "bb dotty targets --json",
+      "expect": {
+        "rc": 0,
+        "json_present": [
+          "browser"
+        ]
+      },
+      "precondition": true
+    },
+    {
+      "name": "the operator has a token",
+      "do": "POST /auth/token",
+      "body": {
+        "email": "ops@sampleone.test"
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "role": "admin"
+        }
+      },
+      "save": {
+        "ops": "token"
+      }
+    },
+    {
+      "name": "empty the hub, so this scenario is about the screen and not about what ran before it",
+      "do": "POST /admin/stock/p6",
+      "as": "ops",
+      "body": {
+        "stock": 0
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 0
+        }
+      }
+    },
+    {
+      "name": "restocking it enables exactly one button and changes nothing else",
+      "run": "bb dotty during restock --reload --url {{base}}/ --json -- curl -s -o /dev/null -X POST {{base}}/admin/stock/p6 -H 'authorization: Bearer {{ops}}' -H 'content-type: application/json' -d '{\"stock\":9}'",
+      "expect": {
+        "rc": 0,
+        "json": {
+          "diff.gone.0.name": "Add Four-port hub to cart",
+          "diff.gone.0.disabled": true,
+          "diff.gone.0.n": 1,
+          "diff.appeared.0.name": "Add Four-port hub to cart",
+          "diff.appeared.0.n": 1
+        },
+        "json_absent": [
+          "diff.appeared.0.disabled"
+        ]
+      }
+    },
+    {
+      "name": "and that button is no longer disabled",
+      "run": "bb dotty shot restocked --url {{base}}/ --json",
+      "expect": {
+        "rc": 0,
+        "contains": {
+          "screen": {
+            "role": "button",
+            "name": "Add Four-port hub to cart"
+          }
+        },
+        "json_absent": [
+          "screen.99"
+        ]
+      }
+    },
+    {
+      "name": "put the shelf back, so the next run starts where this one did",
+      "cleanup": true,
+      "do": "POST /admin/stock/p6",
+      "as": "ops",
+      "body": {
+        "stock": 0
+      },
+      "expect": {
+        "status": 200,
+        "json": {
+          "stock": 0
+        }
+      }
+    }
+  ]
+}

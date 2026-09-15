@@ -75,8 +75,25 @@ a board about nothing.
 ### `bb cookbook run` — what the running system does, 0 tokens
 
 ```
-14 scenarios · 76 steps · 7 surfaces · 8 s · 81 requests · kernel engine · 0 model tokens
+17 scenarios · 92 steps · 8 surfaces · 12 s · 87 requests · kernel engine · 0 model tokens
 ```
+
+Seven of those surfaces are the API. The eighth is `storefront`, and it asks the
+browser what a customer actually sees — `bb dotty` over the Chrome DevTools
+Protocol, with the accessibility tree as the assertion target rather than a
+screenshot. A scenario reads like the others:
+
+```json
+{ "run": "bb dotty shot out-of-stock --url {{base}}/ --json",
+  "expect": { "rc": 0,
+    "contains": { "screen": { "role": "button",
+      "name": "Add Four-port hub to cart", "disabled": true } } } }
+```
+
+`rc 0` already means the frame was not blank. Each storefront scenario opens
+with a `precondition` step asking whether a browser is listening, so on a box
+without one the surface reports **blocked** — the environment — rather than
+nine red steps claiming the storefront is broken.
 
 **The first run was not green.** It found six red steps, and four of them were
 real:
@@ -95,7 +112,14 @@ empty cart. Fixed in the corpus, not in the product.
 All four defects are in code paths that `npm test` (12 tests, all passing at the
 time) did not reach — they are the paths that only exist over the wire.
 
-After the fixes: **76 of 76, every surface at 100%.**
+After the fixes: **92 of 92, every surface at 100%.**
+
+**The storefront surface found a fifth defect, and it was an accessibility one.**
+Ten products rendered ten buttons all named `Add to cart`, so nothing could tell
+them apart — not a screen reader, and not a scenario, which was reduced to
+counting how many were disabled. Counting made the assertion depend on what
+earlier surfaces had sold. The fix was an `aria-label` carrying the product
+name, and the scenario now asserts on the one button it means.
 
 ### `bb runbook logs` — 27.6 kB of log as 29 rows
 
@@ -159,6 +183,8 @@ npm test                                         # 12 tests, ~200 ms, no socket
 bb scan && bb findings                           # the source, 0 tokens
 bb cookbook check                                # the corpus validates: no server, no requests
 bb cookbook run --base http://127.0.0.1:8500     # what the running system does
+bb cookbook run --only storefront                # just the browser surface (needs Chrome on 9222)
+bb dotty shot catalogue --url http://127.0.0.1:8500/   # one frame, and the screen as rows
 bb runbook logs --level E --sample               # errors only, one real line each
 bb recom list                                    # what has already been driven, and whether it holds
 node scripts/monitor.mjs                         # rebuild monitor/index.html
@@ -181,7 +207,7 @@ service on their own.
 | `src/server.js` | the only file that knows about HTTP; handlers return `{status, body}` |
 | `web/` | the storefront: one hue, one scale, `:focus-visible` before `:hover` |
 | `docs/PRD.md` | the document `bb genesis` reads — surfaces, 14 rules, every capability |
-| `.bundlebox/cookbook/sampleone/` | 14 scenarios, 76 steps, 7 surfaces, two customers and an operator |
+| `.bundlebox/cookbook/sampleone/` | 17 scenarios, 92 steps, 8 surfaces, two customers and an operator — seven over the API and one over the browser |
 | `.bundlebox/runbook/` | the service table and 7 named failure buckets |
 | `.bundlebox/recom/records/` | what has already been driven |
 | `monitor/index.html` | the page above, built from the artefacts |

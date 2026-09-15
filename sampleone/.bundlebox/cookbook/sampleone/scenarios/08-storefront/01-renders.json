@@ -1,0 +1,73 @@
+{
+  "id": "storefront-renders-the-catalogue",
+  "surface": "storefront",
+  "severity": "high",
+  "title": "the storefront paints the catalogue, and the frame is a picture of something",
+  "question": "does the page a customer opens actually show ten products?",
+  "rule": [
+    "web/app.js loadCatalogue() fetches GET /products and renders one <li class=card> per item",
+    "web/index.html declares the searchbox with an explicit label, so it has an accessible name",
+    "A frame that came back single-coloured is marked BLANK by `bb dotty` and the step fails: a",
+    "screenshot of nothing is the failure that looks most like a success."
+  ],
+  "steps": [
+    {
+      "name": "a browser is listening, or nothing below this is about the product",
+      "run": "bb dotty targets --json",
+      "expect": {
+        "rc": 0,
+        "json_present": [
+          "browser"
+        ]
+      },
+      "precondition": true
+    },
+    {
+      "name": "the page paints, and it is not a blank rectangle",
+      "run": "bb dotty shot catalogue --url {{base}}/ --json",
+      "expect": {
+        "rc": 0,
+        "json": {
+          "blank": false
+        },
+        "json_present": [
+          "screen",
+          "file"
+        ]
+      }
+    },
+    {
+      "name": "the search box is reachable and named",
+      "run": "bb dotty shot catalogue-search --url {{base}}/ --json",
+      "expect": {
+        "rc": 0,
+        "json": {
+          "screen.0.role": "link",
+          "screen.0.name": "sampleOne"
+        },
+        "contains": {
+          "screen": {
+            "role": "searchbox",
+            "name": "Search the catalogue"
+          }
+        }
+      }
+    },
+    {
+      "name": "the catalogue is on screen, one named button per product",
+      "run": "bb dotty shot catalogue-grid --url {{base}}/ --json",
+      "expect": {
+        "rc": 0,
+        "contains": {
+          "screen": {
+            "role": "button",
+            "name": "Add Sixty-one key keyboard to cart"
+          }
+        },
+        "json_len_at_least": {
+          "screen": 12
+        }
+      }
+    }
+  ]
+}

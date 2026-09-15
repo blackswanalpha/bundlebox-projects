@@ -43,49 +43,49 @@ a{color:var(--green)}
 <h1>sampleOne</h1>
 <p class="sub">What the last run measured. Every number below was read out of a JSON artefact
 bundlebox wrote — nothing on this page is typed by hand.<br>
-Built 2026-09-15T09:12:27.112Z by <code>node scripts/monitor.mjs</code>.</p>
+Built 2026-09-15T10:28:57.021Z by <code>node scripts/monitor.mjs</code>.</p>
 
 <h2>The corpus, against a live service</h2>
 <div class="cards">
   <div class="card ok"><p class="k">steps</p>
-    <p class="v">76 / 76</p>
+    <p class="v">92 / 92</p>
     <p class="w">every surface at 100%</p></div>
-  <div class="card"><p class="k">scenarios</p><p class="v">14</p>
-    <p class="w">across 7 surfaces</p></div>
-  <div class="card"><p class="k">wall clock</p><p class="v">8s</p>
-    <p class="w">81 requests, kernel engine</p></div>
+  <div class="card"><p class="k">scenarios</p><p class="v">17</p>
+    <p class="w">across 8 surfaces</p></div>
+  <div class="card"><p class="k">wall clock</p><p class="v">12.1s</p>
+    <p class="w">87 requests, kernel engine</p></div>
   <div class="card ok"><p class="k">model tokens</p><p class="v">0</p>
     <p class="w">the corpus never calls one</p></div>
 </div>
 
 <h2>By surface</h2>
 <table><thead><tr><th>surface</th><th class="num">passed</th><th class="num">red</th><th class="num">score</th></tr></thead>
-<tbody><tr><td>health</td><td class="num">1</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>catalogue</td><td class="num">5</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>auth</td><td class="num">5</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>cart</td><td class="num">18</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>checkout</td><td class="num">16</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>orders</td><td class="num">25</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>admin</td><td class="num">6</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr></tbody></table>
+<tbody><tr><td>health</td><td class="num">1</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>catalogue</td><td class="num">5</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>auth</td><td class="num">5</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>cart</td><td class="num">18</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>checkout</td><td class="num">16</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>orders</td><td class="num">25</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>admin</td><td class="num">6</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr><tr><td>storefront</td><td class="num">16</td><td class="num"><span class="pill g">0</span></td><td class="num">100%</td></tr></tbody></table>
 
 <h2>The log, as signatures</h2>
 <div class="cards">
-  <div class="card"><p class="k">lines written</p><p class="v">496</p>
-    <p class="w">27,934 bytes on disk</p></div>
+  <div class="card"><p class="k">lines written</p><p class="v">580</p>
+    <p class="w">32,652 bytes on disk</p></div>
   <div class="card ok"><p class="k">rows to read</p>
     <p class="v">29</p>
     <p class="w">distinct signatures</p></div>
   <div class="card ok"><p class="k">tokens spared</p>
-    <p class="v">93%</p>
-    <p class="w">8,495 raw &rarr; 637 digested</p></div>
+    <p class="v">94%</p>
+    <p class="w">9,895 raw &rarr; 637 digested</p></div>
   <div class="card"><p class="k">named failures</p><p class="v">2</p>
     <p class="w">none high</p></div>
 </div>
 <table><thead><tr><th>bucket</th><th>what it means</th><th class="num">n</th></tr></thead>
-<tbody><tr><td><span class="pill a">medium</span> auth-refused</td><td class="num">A request was refused for identity. Expected in the auth scenarios; unexpected elsewhere means a token expired mid-run.</td><td class="num">24</td></tr><tr><td><span class="pill g">low</span> card-declined</td><td class="num">A payment was declined. Expected for a card ending 0000; the stock release path runs on this.</td><td class="num">6</td></tr></tbody></table>
+<tbody><tr><td><span class="pill a">medium</span> auth-refused</td><td class="num">A request was refused for identity. Expected in the auth scenarios; unexpected elsewhere means a token expired mid-run.</td><td class="num">28</td></tr><tr><td><span class="pill g">low</span> card-declined</td><td class="num">A payment was declined. Expected for a card ending 0000; the stock release path runs on this.</td><td class="num">7</td></tr></tbody></table>
 
 <h2>Top signatures</h2>
-<table><thead><tr><th>signature</th><th class="num">n</th></tr></thead><tbody><tr><td><code>INFO POST /cart/lines # #ms</code></td><td class="num">72</td></tr><tr><td><code>WARN POST P # #ms</code></td><td class="num">48</td></tr><tr><td><code>WARN POST /checkout # #ms</code></td><td class="num">36</td></tr><tr><td><code>INFO PATCH P # #ms</code></td><td class="num">30</td></tr><tr><td><code>INFO GET /products # #ms</code></td><td class="num">24</td></tr><tr><td><code>INFO GET /products/p8 # #ms</code></td><td class="num">24</td></tr><tr><td><code>INFO POST /auth/token # #ms</code></td><td class="num">24</td></tr><tr><td><code>INFO POST /checkout # #ms</code></td><td class="num">24</td></tr><tr><td><code>INFO POST P # #ms</code></td><td class="num">24</td></tr><tr><td><code>WARN POST /cart/lines # #ms</code></td><td class="num">24</td></tr><tr><td><code>INFO GET /health # #ms</code></td><td class="num">21</td></tr><tr><td><code>INFO GET /products/p7 # #ms</code></td><td class="num">18</td></tr></tbody></table>
-<p class="note">Every digit, uuid, hash and path erased, so 496 lines
+<table><thead><tr><th>signature</th><th class="num">n</th></tr></thead><tbody><tr><td><code>INFO POST /cart/lines # #ms</code></td><td class="num">84</td></tr><tr><td><code>WARN POST P # #ms</code></td><td class="num">56</td></tr><tr><td><code>WARN POST /checkout # #ms</code></td><td class="num">42</td></tr><tr><td><code>INFO PATCH P # #ms</code></td><td class="num">35</td></tr><tr><td><code>INFO GET /products # #ms</code></td><td class="num">28</td></tr><tr><td><code>INFO GET /products/p8 # #ms</code></td><td class="num">28</td></tr><tr><td><code>INFO POST /auth/token # #ms</code></td><td class="num">28</td></tr><tr><td><code>INFO POST /checkout # #ms</code></td><td class="num">28</td></tr><tr><td><code>INFO POST P # #ms</code></td><td class="num">28</td></tr><tr><td><code>WARN POST /cart/lines # #ms</code></td><td class="num">28</td></tr><tr><td><code>INFO GET /health # #ms</code></td><td class="num">26</td></tr><tr><td><code>INFO GET /products/p7 # #ms</code></td><td class="num">21</td></tr></tbody></table>
+<p class="note">Every digit, uuid, hash and path erased, so 580 lines
 collapse to the shapes they actually are. The raw file is still on disk.</p>
 
 <h2>The source, before anything ran</h2>
 <div class="cards">
-  <div class="card"><p class="k">source</p><p class="v">19.1k</p>
+  <div class="card"><p class="k">source</p><p class="v">19.2k</p>
     <p class="w">tokens over 13 files</p></div>
   <div class="card"><p class="k">findings</p><p class="v">9</p>
     <p class="w">with file and line evidence</p></div>
@@ -103,7 +103,7 @@ collapse to the shapes they actually are. The raw file is still on disk.</p>
 
 <h2>Services</h2>
 <table><thead><tr><th>service</th><th>process</th><th>answering</th><th class="num">latency</th><th class="num">memory</th></tr></thead>
-<tbody><tr><td>sampleone</td><td class="num"><span class="pill g">up</span></td><td class="num"><span class="pill g">up</span></td><td class="num">0.6ms</td><td class="num">19M</td></tr></tbody></table>
+<tbody><tr><td>sampleone</td><td class="num"><span class="pill r">down</span></td><td class="num"><span class="pill g">up</span></td><td class="num">0.5ms</td><td class="num">—</td></tr></tbody></table>
 
 <footer>
 sampleOne is an ecommerce platform that exists to measure bundlebox.

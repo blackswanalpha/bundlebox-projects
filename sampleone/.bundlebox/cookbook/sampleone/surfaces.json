@@ -33,5 +33,10 @@
     "id": "admin",
     "title": "Admin",
     "why": "the only role that moves stock"
+  },
+  {
+    "id": "storefront",
+    "title": "Storefront",
+    "why": "what the browser actually shows, which the API scenarios cannot see"
   }
 ]
