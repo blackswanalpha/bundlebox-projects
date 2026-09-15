@@ -71,12 +71,13 @@ floors are now 5, and both are config (`designlabs.generic_min`).
 
 ## Open
 
-Two, both found by building `sampletwo/` (Relay) with the tool, 2026-09-15.
+Three, all found by building `sampletwo/` (Relay) with the tool, 2026-09-15.
 
 | # | gap | how it showed up | what it costs |
 |---|---|---|---|
 | O5 | a routed lane whose `cwd` equals its `worktree` is spawned into a directory nothing created | `bb route` inside `sampletwo/` — a project directory with no git of its own — wrote a lane with `cwd` and `worktree` both set to `sampletwo.worktrees/<run>-l01`. `ensureWorktree` returns early on `wt === lane.cwd` with the note "shared checkout" and creates nothing, so `bb run --apply` spawned the agent in a path that does not exist. The spawn's ENOENT was reported as **`rc 127 (binary not found: claude)`** over a `claude` that is on `PATH` and that `bb bridge` had used successfully four minutes earlier | `bb run --apply` cannot run from inside a project of this workspace at all, and the message sends the reader to look at their agent install |
 | O6 | `bb bridge report` says `$0.00` after a call that cost `$1.1010` | the call's `result` stream carries `total_cost_usd` and a full `usage` block; `call.json` still holds `spent_tokens: null`, and the row prints a stale `refused_why` from an earlier attempt beside `state: done`. `bb session` reads the same call correctly and reports `billed 2.0M $1.1010 MEASURED` | the one verb whose job is to say what a call cost is the one that says nothing; two views of the same call disagree |
+| O7 | `bb git pr` writes a PR that claims a lane it does not have | opening the PR for this commit gave the title **`bb: feat/sampletwo-relay`** — the branch name with a prefix — over a body reading `- lane ? closed 0 findings`, `## Findings closed / n/a` and `- [ ] (no automated acceptance recorded)`. F14 fixed exactly this for the COMMIT message: with no findings it writes `chore(<scope>): N files in <scope>` and the body says bundlebox cannot know what it closes, then lists what it staged. The PR path never got the same treatment, so a hand-scoped commit produces a PR whose summary is a placeholder and whose one factual line, `lane ?`, names a lane that was never routed | every PR not driven by a lane has to be rewritten by hand after `bb git pr --apply`, and the un-rewritten ones assert a provenance the commit does not have |
 
 O1 — the Windows path bug in `git commit` — turned out to be the first of
 nine, all now fixed and merged; CI is green on Windows, macOS and Linux across
