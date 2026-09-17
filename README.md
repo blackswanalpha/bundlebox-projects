@@ -13,6 +13,7 @@ Three directories, each with a different job.
 | `designlabs/` | a declared design system and the gate that holds it | that a design system can be checked by a parse, and that what a parse cannot settle is reported `unknown` |
 | `tokenlab/` | a task service, and a harness that measures `bb bench` across trees of known size | that the packed arm is CONSTANT while the bare arm pays for the repository — 3.9k tokens whether the tree is 12 files or 400 |
 | `storybook/` | prompts that build systems, with their arithmetic | that the number at the bottom of a prompt can be measured instead of asserted — at two scales, so the limit shows as well as the win |
+| `bundlebox/` | the public landing page for bundlebox itself — Next.js, static, on Vercel | that the numbers the factory measures are the ones the marketing page carries: every figure on it is quoted from `bundlebox`'s own README at v0.5.0, in one file, so the page is re-derived rather than re-argued. [Live](https://bundlebox-beige.vercel.app) |
 
 One git repository at the top. It began as a workspace of independent projects
 with git in each of them, and `demo/` carried its own so a lane scoped there
