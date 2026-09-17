@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+.vercel/
+*.log
+.env*.local
+
+# bundlebox: derived state, rebuilt by bb scan / bb snapgen / bb env up
+.bundlebox/var/
+.bundlebox/out/
