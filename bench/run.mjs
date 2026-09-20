@@ -23,8 +23,13 @@ import { execFileSync } from "node:child_process";
 import { MUTATIONS } from "./mutations.mjs";
 import { materialise, applyMutation, gate, ROOT } from "./prepare.mjs";
 import { wire, briefWritten, envFor } from "./brief.mjs";
+import { AGENTS, installed, packable, spawnAgent, wireFor } from "./agents.mjs";
 
 const MODEL = process.env.BENCH_MODEL || "claude-sonnet-5";
+// The tree each arm is cut from, named in the row and in the summary: a solved
+// rate is about a pairing of agent, cap and tree, and quoting one without the
+// other two is quoting nothing.
+const TREES = { packed: "sampleThree", bare: "sampleFour" };
 const MAX_TURNS = Number(process.env.BENCH_MAX_TURNS || 40);
 const REPEATS = Number(process.env.BENCH_REPEATS || 3);
 const ONLY = process.env.BENCH_ONLY ? process.env.BENCH_ONLY.split(",") : null;
@@ -63,10 +68,25 @@ function runAgent(tree, prompt) {
   }
 }
 
-function one(mutation, arm, repeat) {
-  const tag = `${mutation.id}/${arm}/r${repeat}`;
-  const tree = materialise(arm === "packed" ? "sampleThree" : "sampleFour",
-                           path.join(os.tmpdir(), `bench-${process.pid}-${mutation.id}-${arm}-${repeat}`));
+/** An adapter-driven agent, mapped onto the same row shape `runAgent` returns.
+ *  A usage the adapter could not read comes back null, never zero: a run
+ *  nobody counted must not read as a free one. */
+function fromAdapter(agent, tree, prompt) {
+  const r = spawnAgent(agent, tree, prompt, { model: process.env.BENCH_AGENT_MODEL || "", maxTurns: MAX_TURNS });
+  const u = r.usage;
+  return {
+    usage: u && u.counted ? { input_tokens: u.input, output_tokens: u.output, cache_read_input_tokens: u.cacheRead, cache_creation_input_tokens: u.cacheWrite } : null,
+    num_turns: u?.turns ?? null, wallMs: r.wallMs, error: r.error ?? null, note: r.note, via: r.via || "adapter",
+    // No agent but Claude reports a price or a first-token time headlessly, and
+    // an absent number is absent rather than 0.
+    total_cost_usd: null, ttft_ms: null, duration_ms: null, duration_api_ms: null,
+  };
+}
+
+function one(mutation, arm, repeat, agent = "claude") {
+  const tag = `${mutation.id}/${agent}/${arm}/r${repeat}`;
+  const tree = materialise(TREES[arm],
+                           path.join(os.tmpdir(), `bench-${process.pid}-${mutation.id}-${agent}-${arm}-${repeat}`));
   applyMutation(tree, mutation);
 
   const before = gate(tree);
@@ -77,9 +97,12 @@ function one(mutation, arm, repeat) {
   // has bundlebox wired into it; the hook locates the task when the prompt
   // lands and the guards serve the regions when a read asks.
   const prompt = `${mutation.problem}\n\n${GATE_LINE}`;
-  const wired = arm === "packed" ? wire(tree) : null;
+  const wired = arm === "packed" ? (agent === "claude" ? wire(tree) : wireFor(agent, tree)) : null;
 
-  const r = runAgent(tree, prompt);
+  // Claude keeps the invocation the 18/18 baseline was taken on; the other
+  // agents go through their adapters, which is the only place their flags are
+  // verified. `via` is in the row so the two paths are never averaged blind.
+  const r = agent === "claude" ? runAgent(tree, prompt) : fromAdapter(agent, tree, prompt);
   const served = arm === "packed" ? briefWritten(tree) : null;
   if (arm === "packed" && !served) {
     fs.rmSync(tree, { recursive: true, force: true });
@@ -92,7 +115,8 @@ function one(mutation, arm, repeat) {
 
   const u = r.usage || {};
   const row = {
-    at: new Date().toISOString(), task: mutation.id, arm, repeat, model: MODEL,
+    at: new Date().toISOString(), task: mutation.id, agent, arm, repeat, model: MODEL,
+    tree: TREES[arm], max_turns: MAX_TURNS, via: r.via || "claude-json", adapter_note: r.note || null,
     solved: after.pass && !testsTouched,
     tests_touched: testsTouched,
     failed_before: before.failed.length, failed_after: after.failed,
@@ -101,7 +125,7 @@ function one(mutation, arm, repeat) {
     output_tokens: u.output_tokens ?? null,
     cache_read_input_tokens: u.cache_read_input_tokens ?? null,
     cache_creation_input_tokens: u.cache_creation_input_tokens ?? null,
-    total_tokens: (u.input_tokens ?? 0) + (u.output_tokens ?? 0) + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0),
+    total_tokens: r.usage ? (u.input_tokens ?? 0) + (u.output_tokens ?? 0) + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0) : null,
     cost_usd: r.total_cost_usd ?? null,
     ttft_ms: r.ttft_ms ?? null,
     duration_ms: r.duration_ms ?? null,
@@ -115,7 +139,9 @@ function one(mutation, arm, repeat) {
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.appendFileSync(OUT, JSON.stringify(row) + "\n");
   fs.rmSync(tree, { recursive: true, force: true });
-  console.log(`${tag.padEnd(34)} ${row.solved ? "SOLVED" : "unsolved"}  ${String(row.total_tokens).padStart(8)} tok  $${(row.cost_usd ?? 0).toFixed(4)}  ${row.num_turns} turns  ttft ${row.ttft_ms}ms`);
+  // An uncounted usage prints as `-`, not as 0: `total_tokens` is null when the
+  // adapter read no event it recognised, and a zero there would read as free.
+  console.log(`${tag.padEnd(40)} ${row.solved ? "SOLVED" : "unsolved"}  ${String(row.total_tokens ?? "-").padStart(8)} tok  ${row.cost_usd == null ? "     -" : "$" + row.cost_usd.toFixed(4)}  ${row.num_turns ?? "-"} turns  ttft ${row.ttft_ms ?? "-"}ms`);
   return row;
 }
 
@@ -123,16 +149,30 @@ function one(mutation, arm, repeat) {
 const done = new Set();
 if (fs.existsSync(OUT)) {
   for (const line of fs.readFileSync(OUT, "utf8").split("\n").filter(Boolean)) {
-    try { const r = JSON.parse(line); done.add(`${r.task}/${r.arm}/${r.repeat}`); } catch {}
+    try { const r = JSON.parse(line); done.add(`${r.task}/${r.agent || "claude"}/${r.arm}/${r.repeat}`); } catch {}
   }
 }
 
 const tasks = MUTATIONS.filter((m) => !ONLY || ONLY.includes(m.id));
-console.log(`${tasks.length} task(s) x 2 arms x ${REPEATS} repeat(s) = ${tasks.length * 2 * REPEATS} runs on ${MODEL}\n`);
+
+// Which cells can actually be run, decided before the spend. An agent that is
+// not on the box is skipped and said so; an agent with no prompt hook runs the
+// BARE arm only, because a wired tree it cannot read from is a bare run under a
+// packed label — and one of those in the table would make the whole claim.
+const plan = [];
+for (const agent of AGENTS) {
+  const det = installed(agent);
+  if (!det) { console.log(`${agent.padEnd(10)} not installed on this box — skipped, not counted as unsolved`); continue; }
+  const pack = packable(agent);
+  plan.push({ agent, version: det.version || "", arms: pack.ok ? ["bare", "packed"] : ["bare"] });
+  console.log(`${agent.padEnd(10)} ${String(det.version || "").padEnd(28)} ${pack.ok ? "bare + packed" : `bare only — ${pack.why}`}`);
+}
+const cells = plan.reduce((n, p) => n + p.arms.length, 0);
+console.log(`\n${tasks.length} task(s) x ${cells} cell(s) x ${REPEATS} repeat(s) = ${tasks.length * cells * REPEATS} runs on ${MODEL}\n`);
 let skipped = 0;
-for (const m of tasks) for (let r = 1; r <= REPEATS; r++) for (const arm of ["bare", "packed"]) {
-  if (done.has(`${m.id}/${arm}/${r}`)) { skipped++; continue; }
-  one(m, arm, r);
+for (const m of tasks) for (let r = 1; r <= REPEATS; r++) for (const p of plan) for (const arm of p.arms) {
+  if (done.has(`${m.id}/${p.agent}/${arm}/${r}`)) { skipped++; continue; }
+  one(m, arm, r, p.agent);
 }
 if (skipped) console.log(`(${skipped} run(s) already on disk, skipped)`);
 console.log(`\nwrote ${OUT}`);
